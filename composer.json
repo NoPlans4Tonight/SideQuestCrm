@@ -10,11 +10,10 @@
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
         "laravel/jetstream": "^5.0",
-        "spatie/laravel-multitenancy": "^3.0",
+        "spatie/laravel-multitenancy": "^4.0",
         "spatie/laravel-permission": "^6.0",
         "spatie/laravel-activitylog": "^4.0",
-        "laravel/sanctum": "^4.0",
-        "inertiajs/inertia-laravel": "^1.0"
+        "laravel/sanctum": "^4.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -52,6 +51,31 @@
             "@php artisan key:generate --ansi",
             "@php -r \"file_exists('database/database.sqlite') || touch('database/database.sqlite');\"",
             "@php artisan migrate --graceful --ansi"
+        ],
+        "sidequest:go": [
+            "@php scripts/sidequest-go.php"
+        ],
+        "sidequest:up": [
+            "docker-compose up -d",
+            "@php scripts/wait-for-services.php",
+            "docker-compose exec -T app composer install --no-interaction",
+            "docker-compose exec -T app npm install",
+            "docker-compose exec -T app php artisan key:generate --force",
+            "docker-compose exec -T app php artisan migrate --force",
+            "docker-compose exec -T app php artisan jetstream:install livewire --teams --force",
+            "docker-compose exec -T app php artisan migrate --force",
+            "docker-compose exec -T app npm run build",
+            "echo '🚀 SideQuest CRM is ready! Visit http://localhost:8000'"
+        ],
+        "sidequest:down": [
+            "docker-compose down"
+        ],
+        "sidequest:restart": [
+            "composer sidequest:down",
+            "composer sidequest:up"
+        ],
+        "sidequest:dev": [
+            "./scripts/dev-frontend.sh"
         ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",

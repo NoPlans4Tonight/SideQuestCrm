@@ -34,126 +34,51 @@ A multi-tenant CRM system built for handyman businesses, specifically designed f
 
 ## Quick Start
 
-### 1. Clone the Repository
+### One-Command Setup
 
 ```bash
-git clone <repository-url>
-cd SideQuestCrm
+composer sidequest:go
 ```
 
-### 2. Environment Setup
+This single command will set up everything you need:
+- ✅ Check prerequisites (Docker, ports, etc.)
+- ✅ Set up environment files
+- ✅ Start all Docker containers
+- ✅ Wait for services to be ready
+- ✅ Install PHP and Node.js dependencies
+- ✅ Set up Laravel with Jetstream
+- ✅ Build frontend assets
+- ✅ Display success message with access URLs
 
-Copy the environment file and configure it:
-
-```bash
-cp .env.example .env
-```
-
-Update the `.env` file with your configuration:
-
-```env
-APP_NAME="SideQuest CRM"
-APP_ENV=local
-APP_KEY=
-APP_DEBUG=true
-APP_URL=http://localhost:8000
-
-DB_CONNECTION=mysql
-DB_HOST=db
-DB_PORT=3306
-DB_DATABASE=sidequest_crm
-DB_USERNAME=sidequest_crm
-DB_PASSWORD=secret
-
-REDIS_HOST=redis
-REDIS_PASSWORD=null
-REDIS_PORT=6379
-
-MAIL_MAILER=smtp
-MAIL_HOST=mailhog
-MAIL_PORT=1025
-```
-
-### 3. Start Docker Services
-
-```bash
-docker-compose up -d
-```
-
-### 4. Install Dependencies
-
-```bash
-# Install PHP dependencies
-docker-compose exec app composer install
-
-# Install Node.js dependencies
-docker-compose exec app npm install
-```
-
-### 5. Generate Application Key
-
-```bash
-docker-compose exec app php artisan key:generate
-```
-
-### 6. Run Database Migrations
-
-```bash
-docker-compose exec app php artisan migrate
-```
-
-### 7. Install Laravel Jetstream
-
-```bash
-docker-compose exec app php artisan jetstream:install livewire --teams
-docker-compose exec app php artisan migrate
-```
-
-### 8. Build Frontend Assets
-
-```bash
-docker-compose exec app npm run build
-```
-
-### 9. Create First Tenant
-
-```bash
-docker-compose exec app php artisan tinker
-```
-
-```php
-// Create the first tenant (Rock Hard Chimney)
-$tenant = \App\Models\Tenant::create([
-    'name' => 'rock-hard',
-    'domain' => 'rock-hard.localhost',
-    'database' => 'rock_hard_chimney',
-    'company_name' => 'Rock Hard Chimney',
-    'contact_email' => 'admin@rockhardchimney.com',
-    'contact_phone' => '(555) 123-4567',
-    'address' => '123 Main St',
-    'city' => 'Anytown',
-    'state' => 'CA',
-    'zip_code' => '90210',
-    'country' => 'US',
-    'timezone' => 'America/Los_Angeles',
-    'is_active' => true,
-]);
-
-// Create admin user for the tenant
-$user = \App\Models\User::create([
-    'tenant_id' => $tenant->id,
-    'name' => 'Admin User',
-    'email' => 'admin@rockhardchimney.com',
-    'password' => bcrypt('password'),
-    'position' => 'Administrator',
-    'is_active' => true,
-]);
-```
-
-### 10. Access the Application
+### Access Your Application
 
 - **Main Application**: http://localhost:8000
 - **MailHog (Email Testing)**: http://localhost:8025
+- **MySQL Database**: localhost:3306
+- **Redis Cache**: localhost:6379
+
+### Development Commands
+
+```bash
+# Start everything (first time setup)
+composer sidequest:go
+
+# Start services only (if already set up)
+composer sidequest:up
+
+# Stop all services
+composer sidequest:down
+
+# Restart all services
+composer sidequest:restart
+
+# Start frontend development mode (hot reloading)
+composer sidequest:dev
+```
+
+### Manual Setup (Alternative)
+
+If you prefer manual setup, see [DEVELOPMENT.md](DEVELOPMENT.md) for detailed instructions.
 
 ## Development
 
