@@ -1,0 +1,51 @@
+{
+    "name": "sidequest-crm",
+    "description": "SideQuest CRM - Multi-tenant Customer Relationship Management System",
+    "type": "laravel",
+    "php": "8.2",
+    "build": [
+        "composer install --no-dev --optimize-autoloader",
+        "npm ci",
+        "npm run build",
+        "php artisan config:cache",
+        "php artisan route:cache",
+        "php artisan view:cache"
+    ],
+    "deploy": [
+        "php artisan migrate --force",
+        "php artisan storage:link"
+    ],
+    "environment": {
+        "APP_ENV": "production",
+        "APP_DEBUG": "false",
+        "LOG_CHANNEL": "stack",
+        "CACHE_DRIVER": "redis",
+        "QUEUE_CONNECTION": "redis",
+        "SESSION_DRIVER": "redis",
+        "SESSION_LIFETIME": "120"
+    },
+    "requirements": {
+        "extensions": [
+            "bcmath",
+            "ctype",
+            "fileinfo",
+            "json",
+            "mbstring",
+            "openssl",
+            "pdo",
+            "pdo_mysql",
+            "tokenizer",
+            "xml"
+        ]
+    },
+    "services": {
+        "database": {
+            "type": "mysql",
+            "version": "8.0"
+        },
+        "redis": {
+            "type": "redis",
+            "version": "7.0"
+        }
+    }
+}
