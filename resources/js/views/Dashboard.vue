@@ -287,20 +287,53 @@ onMounted(async () => {
 
 const loadDashboardData = async () => {
   try {
+    const token = localStorage.getItem('auth_token')
+    console.log('Auth token:', token ? 'Present' : 'Missing')
+
+    // Test basic API connectivity first
+    console.log('Testing basic API...')
+    const testResponse = await fetch('/api/test')
+    console.log('Test response status:', testResponse.status)
+
+    // Test authentication
+    console.log('Testing authentication...')
+    const authResponse = await fetch('/api/test-auth', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    })
+    console.log('Auth test response status:', authResponse.status)
+
+    if (authResponse.ok) {
+      const authData = await authResponse.json()
+      console.log('Auth test successful:', authData)
+    } else {
+      const authErrorText = await authResponse.text()
+      console.error('Auth test failed:', authResponse.status, authErrorText)
+    }
+
     // Load dashboard statistics
     const response = await fetch('/api/dashboard', {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-        'Content-Type': 'application/json'
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
       }
     })
 
-          if (response.ok) {
-        const data = await response.json()
-        stats.value = data.stats
-        upcomingJobs.value = data.upcomingJobs
-        recentActivity.value = data.recentActivity
-      }
+    console.log('Dashboard response status:', response.status)
+
+    if (response.ok) {
+      const data = await response.json()
+      stats.value = data.stats
+      upcomingJobs.value = data.upcomingJobs
+      recentActivity.value = data.recentActivity
+    } else {
+      const errorText = await response.text()
+      console.error('Dashboard API Error:', response.status, errorText)
+    }
   } catch (error) {
     console.error('Error loading dashboard data:', error)
   }
