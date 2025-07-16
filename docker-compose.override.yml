@@ -18,33 +18,33 @@ services:
       - ./:/var/www
       - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
     ports:
-      - "8000:80"
+      - "${DOCKER_WEB_PORT:-8000}:80"
     environment:
       - NGINX_HOST=localhost
       - NGINX_PORT=80
 
   db:
     ports:
-      - "3306:3306"
+      - "${DOCKER_DB_PORT:-3306}:3306"
     environment:
-      - MYSQL_DATABASE=sidequest_crm
-      - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_PASSWORD=secret
-      - MYSQL_USER=sidequest_crm
+      - MYSQL_DATABASE=${DOCKER_DB_DATABASE}
+      - MYSQL_ROOT_PASSWORD=${DOCKER_DB_ROOT_PASSWORD}
+      - MYSQL_PASSWORD=${DOCKER_DB_PASSWORD}
+      - MYSQL_USER=${DOCKER_DB_USERNAME}
     volumes:
       - dbdata:/var/lib/mysql
       - ./docker/mysql/my.cnf:/etc/mysql/my.cnf
 
   redis:
     ports:
-      - "6379:6379"
+      - "${DOCKER_REDIS_PORT:-6379}:6379"
     volumes:
       - redisdata:/data
 
   mailhog:
     ports:
-      - "1025:1025"
-      - "8025:8025"
+      - "${DOCKER_MAILHOG_SMTP_PORT:-1025}:1025"
+      - "${DOCKER_MAILHOG_UI_PORT:-8025}:8025"
 
 volumes:
   dbdata:

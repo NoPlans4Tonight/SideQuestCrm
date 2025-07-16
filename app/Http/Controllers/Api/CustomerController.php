@@ -14,8 +14,18 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        $customers = Customer::withCount('jobs')->orderBy('name')->paginate(15);
-        return response()->json($customers);
+        $customers = Customer::withCount('jobs')->orderBy('first_name')->orderBy('last_name')->paginate(15);
+        return response()->json([
+            'data' => $customers->items(),
+            'meta' => [
+                'current_page' => $customers->currentPage(),
+                'last_page' => $customers->lastPage(),
+                'per_page' => $customers->perPage(),
+                'total' => $customers->total(),
+                'from' => $customers->firstItem(),
+                'to' => $customers->lastItem(),
+            ]
+        ]);
     }
 
     /**
@@ -25,18 +35,26 @@ class CustomerController extends Controller
     {
         try {
             $validated = $request->validate([
-                'name' => 'required|string|max:255',
+                'first_name' => 'required|string|max:255',
+                'last_name' => 'required|string|max:255',
                 'email' => 'nullable|email|max:255',
                 'phone' => 'nullable|string|max:20',
                 'address' => 'nullable|string|max:500',
+                'city' => 'nullable|string|max:255',
+                'state' => 'nullable|string|max:255',
+                'zip_code' => 'nullable|string|max:20',
+                'country' => 'nullable|string|max:255',
                 'notes' => 'nullable|string|max:1000',
+                'status' => 'nullable|string|in:active,inactive,prospect',
+                'source' => 'nullable|string|max:255',
+                'assigned_to' => 'nullable|exists:users,id',
             ]);
 
             $customer = Customer::create($validated);
 
             return response()->json([
                 'message' => 'Customer created successfully',
-                'customer' => $customer
+                'data' => $customer
             ], 201);
         } catch (ValidationException $e) {
             return response()->json([
@@ -52,7 +70,9 @@ class CustomerController extends Controller
     public function show(Customer $customer)
     {
         $customer->load('jobs');
-        return response()->json($customer);
+        return response()->json([
+            'data' => $customer
+        ]);
     }
 
     /**
@@ -62,18 +82,26 @@ class CustomerController extends Controller
     {
         try {
             $validated = $request->validate([
-                'name' => 'required|string|max:255',
+                'first_name' => 'required|string|max:255',
+                'last_name' => 'required|string|max:255',
                 'email' => 'nullable|email|max:255',
                 'phone' => 'nullable|string|max:20',
                 'address' => 'nullable|string|max:500',
+                'city' => 'nullable|string|max:255',
+                'state' => 'nullable|string|max:255',
+                'zip_code' => 'nullable|string|max:20',
+                'country' => 'nullable|string|max:255',
                 'notes' => 'nullable|string|max:1000',
+                'status' => 'nullable|string|in:active,inactive,prospect',
+                'source' => 'nullable|string|max:255',
+                'assigned_to' => 'nullable|exists:users,id',
             ]);
 
             $customer->update($validated);
 
             return response()->json([
                 'message' => 'Customer updated successfully',
-                'customer' => $customer
+                'data' => $customer
             ]);
         } catch (ValidationException $e) {
             return response()->json([

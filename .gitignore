@@ -27,3 +27,5 @@ Thumbs.db
 .local/share/composer/.htaccess
 .npm/
 .npm/_cache/
+psysh/
+cookies.txt

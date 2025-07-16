@@ -57,6 +57,58 @@ This single command will set up everything you need:
 - **MySQL Database**: localhost:3306
 - **Redis Cache**: localhost:6379
 
+### Configuration
+
+The application uses environment variables for all configuration. Key Docker variables include:
+
+```bash
+# Port Configuration
+DOCKER_WEB_PORT=8000          # Web server port
+DOCKER_DB_PORT=3306           # Database port
+DOCKER_REDIS_PORT=6379        # Redis port
+DOCKER_MAILHOG_SMTP_PORT=1025 # MailHog SMTP port
+DOCKER_MAILHOG_UI_PORT=8025   # MailHog UI port
+
+# Database Configuration (REQUIRED - no defaults)
+DOCKER_DB_DATABASE=sidequest_crm
+DOCKER_DB_USERNAME=sidequest_crm
+DOCKER_DB_PASSWORD=your_secure_password_here
+DOCKER_DB_ROOT_PASSWORD=your_secure_root_password_here
+```
+
+To customize these settings, run:
+```bash
+composer sidequest:customize
+```
+
+### Security
+
+The application requires explicit database credentials to be set in the `.env` file. No default values are provided for security reasons.
+
+**Required Database Variables:**
+- `DOCKER_DB_DATABASE` - Database name
+- `DOCKER_DB_USERNAME` - Database username  
+- `DOCKER_DB_PASSWORD` - Database password
+- `DOCKER_DB_ROOT_PASSWORD` - Database root password
+
+To generate secure random secrets:
+
+```bash
+composer sidequest:secrets
+```
+
+This will generate:
+- Secure database passwords
+- Laravel application key
+- Session encryption keys
+- API token secrets
+
+**Important**: 
+- Never commit your `.env` file to version control
+- The `.env.example` file contains placeholder values for reference
+- Setup will fail if database credentials are not explicitly set
+- This helps prevent deployment issues and makes debugging easier
+
 ### Development Commands
 
 ```bash
@@ -74,6 +126,12 @@ composer sidequest:restart
 
 # Start frontend development mode (hot reloading)
 composer sidequest:dev
+
+# Customize Docker configuration
+composer sidequest:customize
+
+# Generate secure secrets
+composer sidequest:secrets
 ```
 
 ### Manual Setup (Alternative)

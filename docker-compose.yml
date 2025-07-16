@@ -9,7 +9,7 @@ services:
     restart: unless-stopped
     working_dir: /var/www/
     ports:
-      - "5173:5173"
+      - "${DOCKER_APP_PORT:-5173}:5173"
     volumes:
       - ./:/var/www
       - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
@@ -21,7 +21,7 @@ services:
     container_name: sidequest_crm_nginx
     restart: unless-stopped
     ports:
-      - "8000:80"
+      - "${DOCKER_WEB_PORT:-8000}:80"
     volumes:
       - ./:/var/www
       - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
@@ -33,14 +33,14 @@ services:
     container_name: sidequest_crm_db
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: sidequest_crm
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_PASSWORD: secret
-      MYSQL_USER: sidequest_crm
+      MYSQL_DATABASE: ${DOCKER_DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DOCKER_DB_ROOT_PASSWORD}
+      MYSQL_PASSWORD: ${DOCKER_DB_PASSWORD}
+      MYSQL_USER: ${DOCKER_DB_USERNAME}
       SERVICE_TAGS: dev
       SERVICE_NAME: mysql
     ports:
-      - "3306:3306"
+      - "${DOCKER_DB_PORT:-3306}:3306"
     volumes:
       - ./docker/mysql/my.cnf:/etc/mysql/my.cnf
       - dbdata:/var/lib/mysql
@@ -52,7 +52,7 @@ services:
     container_name: sidequest_crm_redis
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "${DOCKER_REDIS_PORT:-6379}:6379"
     networks:
       - sidequest_crm_network
 
@@ -61,8 +61,8 @@ services:
     container_name: sidequest_crm_mailhog
     restart: unless-stopped
     ports:
-      - "1025:1025"
-      - "8025:8025"
+      - "${DOCKER_MAILHOG_SMTP_PORT:-1025}:1025"
+      - "${DOCKER_MAILHOG_UI_PORT:-8025}:8025"
     networks:
       - sidequest_crm_network
 
