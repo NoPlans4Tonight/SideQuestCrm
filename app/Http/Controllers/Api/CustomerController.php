@@ -2,129 +2,96 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Contracts\Services\CustomerServiceInterface;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Customer\StoreCustomerRequest;
-use App\Http\Requests\Customer\UpdateCustomerRequest;
-use App\Http\Resources\CustomerResource;
-use App\Http\Resources\CustomerCollection;
-use Illuminate\Http\JsonResponse;
+use App\Models\Customer;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class CustomerController extends Controller
 {
-    public function __construct(
-        private CustomerServiceInterface $customerService
-    ) {}
-
-    public function index(Request $request): AnonymousResourceCollection
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
     {
-        $perPage = $request->get('per_page', 15);
-        $customers = $this->customerService->getCustomers(
-            Auth::user()->tenant_id,
-            $perPage
-        );
-
-        return CustomerCollection::make($customers);
+        $customers = Customer::withCount('jobs')->orderBy('name')->paginate(15);
+        return response()->json($customers);
     }
 
-    public function store(StoreCustomerRequest $request): JsonResponse
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
     {
-        $customer = $this->customerService->createCustomer(
-            $request->validated(),
-            Auth::user()->tenant_id,
-            Auth::id()
-        );
+        try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'nullable|email|max:255',
+                'phone' => 'nullable|string|max:20',
+                'address' => 'nullable|string|max:500',
+                'notes' => 'nullable|string|max:1000',
+            ]);
 
-        return response()->json([
-            'message' => 'Customer created successfully',
-            'data' => CustomerResource::make($customer)
-        ], 201);
-    }
+            $customer = Customer::create($validated);
 
-    public function show(int $id): JsonResponse
-    {
-        $customer = $this->customerService->getCustomer($id);
-
-        if (!$customer || $customer->tenant_id !== Auth::user()->tenant_id) {
-            return response()->json(['message' => 'Customer not found'], 404);
+            return response()->json([
+                'message' => 'Customer created successfully',
+                'customer' => $customer
+            ], 201);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
         }
-
-        return response()->json([
-            'data' => CustomerResource::make($customer)
-        ]);
     }
 
-    public function update(UpdateCustomerRequest $request, int $id): JsonResponse
+    /**
+     * Display the specified resource.
+     */
+    public function show(Customer $customer)
     {
-        $customer = $this->customerService->getCustomer($id);
-
-        if (!$customer || $customer->tenant_id !== Auth::user()->tenant_id) {
-            return response()->json(['message' => 'Customer not found'], 404);
-        }
-
-        $updatedCustomer = $this->customerService->updateCustomer($id, $request->validated());
-
-        return response()->json([
-            'message' => 'Customer updated successfully',
-            'data' => CustomerResource::make($updatedCustomer)
-        ]);
+        $customer->load('jobs');
+        return response()->json($customer);
     }
 
-    public function destroy(int $id): JsonResponse
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, Customer $customer)
     {
-        $customer = $this->customerService->getCustomer($id);
+        try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'nullable|email|max:255',
+                'phone' => 'nullable|string|max:20',
+                'address' => 'nullable|string|max:500',
+                'notes' => 'nullable|string|max:1000',
+            ]);
 
-        if (!$customer || $customer->tenant_id !== Auth::user()->tenant_id) {
-            return response()->json(['message' => 'Customer not found'], 404);
+            $customer->update($validated);
+
+            return response()->json([
+                'message' => 'Customer updated successfully',
+                'customer' => $customer
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
         }
+    }
 
-        $this->customerService->deleteCustomer($id);
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Customer $customer)
+    {
+        $customer->delete();
 
         return response()->json([
             'message' => 'Customer deleted successfully'
         ]);
-    }
-
-    public function search(Request $request): AnonymousResourceCollection
-    {
-        $query = $request->get('q', '');
-
-        if (empty($query)) {
-            return CustomerCollection::make(collect());
-        }
-
-        $customers = $this->customerService->searchCustomers(
-            Auth::user()->tenant_id,
-            $query
-        );
-
-        return CustomerCollection::make($customers);
-    }
-
-    public function byStatus(Request $request): AnonymousResourceCollection
-    {
-        $status = $request->get('status', 'active');
-
-        $customers = $this->customerService->getCustomersByStatus(
-            Auth::user()->tenant_id,
-            $status
-        );
-
-        return CustomerCollection::make($customers);
-    }
-
-    public function byAssignedUser(Request $request): AnonymousResourceCollection
-    {
-        $userId = $request->get('user_id', Auth::id());
-
-        $customers = $this->customerService->getCustomersByAssignedUser(
-            Auth::user()->tenant_id,
-            $userId
-        );
-
-        return CustomerCollection::make($customers);
     }
 }
