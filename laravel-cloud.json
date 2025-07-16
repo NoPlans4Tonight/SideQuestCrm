@@ -19,6 +19,7 @@
         "APP_ENV": "production",
         "APP_DEBUG": "false",
         "LOG_CHANNEL": "stack",
+        "DB_CONNECTION": "mysql",
         "CACHE_DRIVER": "redis",
         "QUEUE_CONNECTION": "redis",
         "SESSION_DRIVER": "redis",
