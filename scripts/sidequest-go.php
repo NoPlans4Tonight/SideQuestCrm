@@ -242,7 +242,7 @@ class SideQuestGo
             private function areServicesReady(): bool
     {
         // Check if MySQL is ready
-        $mysqlReady = $this->runDockerCommandFromContainer("db", "mysqladmin ping -h localhost -u root -proot --silent", true);
+        $mysqlReady = $this->runDockerCommandFromContainer("db", "mysqladmin ping -h localhost --silent", true);
 
         // Check if Redis is ready
         $redisReady = $this->runDockerCommandFromContainer("redis", "redis-cli ping", true);

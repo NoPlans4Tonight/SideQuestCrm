@@ -42,7 +42,7 @@ class TestUserSeeder extends Seeder
                 'tenant_id' => $tenant->id,
                 'name' => 'Super Admin',
                 'email' => 'admin@sidequest.com',
-                'password' => Hash::make('password'),
+                'password' => Hash::make(env('TEST_ADMIN_PASSWORD')),
                 'position' => 'Super Administrator',
                 'is_active' => true,
                 'email_verified_at' => now(),
@@ -56,7 +56,7 @@ class TestUserSeeder extends Seeder
             'tenant_id' => $tenant->id,
             'name' => 'Test User',
             'email' => 'test@sidequest.com',
-            'password' => Hash::make('password'),
+            'password' => Hash::make(env('TEST_USER_PASSWORD')),
             'position' => 'Sales Representative',
             'is_active' => true,
             'email_verified_at' => now(),
@@ -64,8 +64,9 @@ class TestUserSeeder extends Seeder
         );
 
         $this->command->info('Test users created successfully!');
-        $this->command->info('Super Admin: admin@sidequest.com / password');
-        $this->command->info('Test User: test@sidequest.com / password');
+        $this->command->info('Super Admin: admin@sidequest.com');
+        $this->command->info('Test User: test@sidequest.com');
         $this->command->info('Tenant: Rock Hard Chimney (rock-hard)');
+        $this->command->info('⚠️  IMPORTANT: Set TEST_ADMIN_PASSWORD and TEST_USER_PASSWORD in your .env file!');
     }
 }

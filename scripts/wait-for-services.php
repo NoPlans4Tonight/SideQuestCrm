@@ -43,7 +43,7 @@ class ServiceWaiter
     {
         $attempts = 0;
         while ($attempts < self::MAX_ATTEMPTS) {
-            $command = "docker-compose exec -T db mysqladmin ping -h localhost -u root -proot --silent 2>&1";
+            $command = "docker-compose exec -T db mysqladmin ping -h localhost --silent 2>&1";
             $output = [];
             $returnCode = 0;
 
