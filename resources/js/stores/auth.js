@@ -9,11 +9,20 @@ export const useAuthStore = defineStore('auth', () => {
   const setUser = (userData) => {
     user.value = userData
     isAuthenticated.value = !!userData
+    if (userData) {
+      localStorage.setItem('user', JSON.stringify(userData))
+    } else {
+      localStorage.removeItem('user')
+    }
   }
 
   const setToken = (authToken) => {
     token.value = authToken
-    localStorage.setItem('auth_token', authToken)
+    if (authToken) {
+      localStorage.setItem('auth_token', authToken)
+    } else {
+      localStorage.removeItem('auth_token')
+    }
   }
 
   const logout = () => {
@@ -29,9 +38,14 @@ export const useAuthStore = defineStore('auth', () => {
     const storedUser = localStorage.getItem('user')
 
     if (storedToken && storedUser) {
-      token.value = storedToken
-      user.value = JSON.parse(storedUser)
-      isAuthenticated.value = true
+      try {
+        token.value = storedToken
+        user.value = JSON.parse(storedUser)
+        isAuthenticated.value = true
+      } catch (error) {
+        console.error('Error parsing stored user data:', error)
+        logout()
+      }
     }
   }
 

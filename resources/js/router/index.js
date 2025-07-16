@@ -11,6 +11,12 @@ import JobShow from '@/views/Jobs/JobShow.vue';
 
 const routes = [
   {
+    path: '/login',
+    name: 'login',
+    component: () => import('@/views/Auth/Login.vue'),
+    meta: { requiresGuest: true }
+  },
+  {
     path: '/',
     name: 'dashboard',
     component: Dashboard,
@@ -73,16 +79,16 @@ const router = createRouter({
 
 // Navigation guard for authentication
 router.beforeEach((to, from, next) => {
-  if (to.meta.requiresAuth && !isAuthenticated()) {
+  // Get auth state from localStorage since store might not be initialized yet
+  const isAuthenticated = localStorage.getItem('auth_token') !== null;
+
+  if (to.meta.requiresAuth && !isAuthenticated) {
     next('/login');
+  } else if (to.meta.requiresGuest && isAuthenticated) {
+    next('/');
   } else {
     next();
   }
 });
-
-function isAuthenticated() {
-  // Check if user is authenticated (implement based on your auth strategy)
-  return localStorage.getItem('auth_token') !== null;
-}
 
 export default router;
