@@ -140,12 +140,12 @@ class SideQuestGo
         $this->runDockerCommand("php artisan key:generate --force");
 
         // Install Jetstream (no --force)
-        echo "   Installing Laravel Jetstream...\n";
-        $this->runDockerCommand("php artisan jetstream:install livewire --teams");
+        // echo "   Installing Laravel Jetstream...\n";
+        // $this->runDockerCommand("php artisan jetstream:install livewire --teams");
 
-        // Run fresh migrations after Jetstream install
-        echo "   Running database migrations (fresh)...\n";
-        $this->runDockerCommand("php artisan migrate:fresh --force");
+        // Run migrations after Jetstream install
+        echo "   Running database migrations...\n";
+        $this->runDockerCommand("php artisan migrate --force");
 
         echo "✅ Laravel setup complete\n\n";
     }
