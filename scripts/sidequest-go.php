@@ -152,11 +152,14 @@ class SideQuestGo
 
     private function buildFrontend(): void
     {
-        echo "🏗️ Building frontend assets...\n";
+        echo "🏗️ Building frontend assets for development...\n";
 
+        // Build assets first for initial load
         $this->runDockerCommand("npm run build");
 
-        echo "✅ Frontend assets built\n\n";
+        echo "✅ Frontend assets built\n";
+        echo "   🔧 To start Vue DevTools, run: composer sidequest:dev\n";
+        echo "   🔧 Then access: http://localhost:5173 for hot reload and debugging\n\n";
     }
 
     private function displaySuccess(): void
@@ -166,6 +169,7 @@ class SideQuestGo
         echo "\n";
         echo "📋 Your SideQuest CRM is ready:\n";
         echo "   🌐 Main Application: http://localhost:8000\n";
+        echo "   🔧 Vue DevTools: Run 'composer sidequest:dev' then visit http://localhost:5173\n";
         echo "   📧 MailHog (Email Testing): http://localhost:8025\n";
         echo "   🗄️ MySQL Database: localhost:3306\n";
         echo "   🔴 Redis Cache: localhost:6379\n";
@@ -173,11 +177,13 @@ class SideQuestGo
         echo "📚 Next steps:\n";
         echo "   1. Create your first tenant using: docker-compose exec app php artisan tinker\n";
         echo "   2. Access the application at: http://localhost:8000\n";
-        echo "   3. Check the README.md for detailed setup instructions\n";
+        echo "   3. Open Vue DevTools in Chrome/Firefox for debugging\n";
+        echo "   4. Check the README.md for detailed setup instructions\n";
         echo "\n";
         echo "🛠️ Useful commands:\n";
         echo "   composer sidequest:down    - Stop all services\n";
         echo "   composer sidequest:restart - Restart all services\n";
+        echo "   composer sidequest:dev     - Start Vue dev server with hot reload\n";
         echo "   docker-compose logs -f     - View live logs\n";
         echo "\n";
     }

@@ -20,6 +20,8 @@ echo ""
 echo "🚀 Starting Vite development server..."
 echo "   This will watch for changes and automatically rebuild assets"
 echo "   Access your app at: http://localhost:8000"
+echo "   Vue DevTools available at: http://localhost:5173"
+echo "   Make sure you have Vue DevTools extension installed in your browser"
 echo ""
 
 # Run npm run dev in the container
