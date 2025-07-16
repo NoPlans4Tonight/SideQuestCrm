@@ -102,7 +102,8 @@ const loadJobs = async () => {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
         'Content-Type': 'application/json'
-      }
+      },
+      credentials: 'include'
     })
 
     if (response.ok) {

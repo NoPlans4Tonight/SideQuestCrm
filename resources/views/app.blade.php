@@ -23,12 +23,6 @@
             user: @json(auth()->user()),
             csrfToken: '{{ csrf_token() }}'
         };
-
-        // Set auth token for API calls
-        @if(auth()->check())
-            localStorage.setItem('auth_token', '{{ auth()->user()->createToken("auth-token")->plainTextToken }}');
-            localStorage.setItem('user', JSON.stringify(@json(auth()->user())));
-        @endif
     </script>
 </body>
 </html>

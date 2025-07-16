@@ -78,13 +78,24 @@ const router = createRouter({
 });
 
 // Navigation guard for authentication
-router.beforeEach((to, from, next) => {
-  // Get auth state from localStorage since store might not be initialized yet
-  const isAuthenticated = localStorage.getItem('auth_token') !== null;
+router.beforeEach(async (to, from, next) => {
+  // Import the auth store dynamically to avoid circular dependencies
+  const { useAuthStore } = await import('@/stores/authStore');
+  const authStore = useAuthStore();
 
-  if (to.meta.requiresAuth && !isAuthenticated) {
+  // Only initialize auth if we haven't tried yet and we're not going to login
+  if (!authStore.getIsAuthenticated && authStore.getUser === null && to.path !== '/login') {
+    try {
+      await authStore.initializeAuth();
+    } catch (error) {
+      // If initialization fails, user is not authenticated
+      console.log('Auth initialization failed, user not authenticated');
+    }
+  }
+
+  if (to.meta.requiresAuth && !authStore.getIsAuthenticated) {
     next('/login');
-  } else if (to.meta.requiresGuest && isAuthenticated) {
+  } else if (to.meta.requiresGuest && authStore.getIsAuthenticated) {
     next('/');
   } else {
     next();

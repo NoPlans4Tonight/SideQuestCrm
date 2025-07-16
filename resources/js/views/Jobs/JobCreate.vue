@@ -202,7 +202,8 @@ const loadCustomers = async () => {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
         'Content-Type': 'application/json'
-      }
+      },
+      credentials: 'include'
     })
 
     if (response.ok) {
@@ -225,7 +226,8 @@ const createJob = async () => {
         'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(form.value)
+      body: JSON.stringify(form.value),
+      credentials: 'include'
     })
 
     const data = await response.json()

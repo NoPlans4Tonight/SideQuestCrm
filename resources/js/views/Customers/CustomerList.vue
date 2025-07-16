@@ -107,8 +107,8 @@
 
         <!-- Customer List -->
         <div v-else class="mt-6 bg-white shadow overflow-hidden sm:rounded-md">
-          <ul v-if="customerStore.getCustomers.length > 0" class="divide-y divide-gray-200">
-            <li v-for="customer in customerStore.getCustomers" :key="customer.id">
+          <ul v-if="customerStore.getCustomers && customerStore.getCustomers.length > 0" class="divide-y divide-gray-200">
+            <li v-for="customer in (customerStore.getCustomers || [])" :key="customer.id">
               <router-link
                 :to="`/customers/${customer.id}`"
                 class="block hover:bg-gray-50 transition-colors duration-150"
@@ -119,14 +119,14 @@
                       <div class="flex-shrink-0 h-10 w-10">
                         <div class="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
                           <span class="text-sm font-medium text-gray-700">
-                            {{ getInitials(customer.full_name) }}
+                            {{ getInitials(customer.full_name || customer.first_name + ' ' + customer.last_name) }}
                           </span>
                         </div>
                       </div>
                       <div class="ml-4">
                         <div class="flex items-center">
                           <p class="text-sm font-medium text-indigo-600 truncate">
-                            {{ customer.full_name }}
+                            {{ customer.full_name || customer.first_name + ' ' + customer.last_name }}
                           </p>
                           <span
                             :class="getStatusClass(customer.status)"

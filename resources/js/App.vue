@@ -125,31 +125,23 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
+import { useAuthStore } from '@/stores/authStore'
 
 const router = useRouter()
 const authStore = useAuthStore()
 const mobileMenuOpen = ref(false)
 
 onMounted(() => {
-  authStore.initialize()
+  authStore.initializeAuth()
 })
 
 const logout = async () => {
   try {
-    // Call logout API endpoint
-    await fetch('/api/logout', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
-      }
-    })
+    await authStore.logout()
+    router.push('/login')
   } catch (error) {
     console.error('Logout error:', error)
-  } finally {
-    authStore.logout()
+    // Even if logout fails, redirect to login
     router.push('/login')
   }
 }
