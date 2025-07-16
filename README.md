@@ -65,7 +65,7 @@ composer sidequest:dev     # Frontend dev mode
 
 ## Tech Stack
 
-- **Backend**: Laravel 11, PHP 8.2
+- **Backend**: Laravel 12, PHP 8.2
 - **Frontend**: Vue.js 3, Tailwind CSS
 - **Database**: MySQL 8.0
 - **Auth**: Laravel Jetstream
