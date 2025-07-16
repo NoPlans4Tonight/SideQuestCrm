@@ -154,12 +154,12 @@ class SideQuestGo
     {
         echo "🏗️ Building frontend assets for development...\n";
 
-        // Build assets first for initial load
+        // Build assets for development (with source maps and debugging)
         $this->runDockerCommand("npm run build");
 
-        echo "✅ Frontend assets built\n";
-        echo "   🔧 To start Vue DevTools, run: composer sidequest:dev\n";
-        echo "   🔧 Then access: http://localhost:5173 for hot reload and debugging\n\n";
+        echo "✅ Frontend assets built for development\n";
+        echo "   🔧 To start Vue DevTools with hot reload, run: composer sidequest:dev\n";
+        echo "   🔧 Then access: http://localhost:5173 for debugging\n\n";
     }
 
     private function displaySuccess(): void
@@ -184,6 +184,7 @@ class SideQuestGo
         echo "   composer sidequest:down    - Stop all services\n";
         echo "   composer sidequest:restart - Restart all services\n";
         echo "   composer sidequest:dev     - Start Vue dev server with hot reload\n";
+        echo "   composer sidequest:build   - Build for production deployment\n";
         echo "   docker-compose logs -f     - View live logs\n";
         echo "\n";
     }
