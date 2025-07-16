@@ -57,8 +57,9 @@ REDIS_HOST=${REDIS_HOST}
 REDIS_PASSWORD=${REDIS_PASSWORD}
 REDIS_PORT=6379
 
-# Cache and Session
+# Cache, Queue, and Session (IMPORTANT: Use Redis, not database)
 CACHE_DRIVER=redis
+CACHE_STORE=redis
 QUEUE_CONNECTION=redis
 SESSION_DRIVER=redis
 SESSION_LIFETIME=120
@@ -186,8 +187,14 @@ Laravel Cloud automatically provides SSL certificates for all domains.
 - Verify database credentials in environment variables
 - Check that database is accessible from Laravel Cloud
 - Ensure migrations can run successfully
+- **IMPORTANT**: Make sure `DB_CONNECTION=mysql` is set (not sqlite)
 
-#### 3. Asset Loading Issues
+#### 3. Cache/Queue/Session Issues
+- **CRITICAL**: Set `CACHE_DRIVER=redis`, `QUEUE_CONNECTION=redis`, `SESSION_DRIVER=redis`
+- Do NOT use 'database' for these in production
+- Ensure Redis credentials are properly configured
+
+#### 4. Asset Loading Issues
 - Verify Vite build completed successfully
 - Check that `npm run build` generated assets
 - Ensure `APP_URL` is set correctly
