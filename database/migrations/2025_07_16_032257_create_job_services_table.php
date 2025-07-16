@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('job_services', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('job_id')->constrained()->onDelete('cascade');
+            $table->foreignId('job_id')->constrained('crm_jobs')->onDelete('cascade');
             $table->foreignId('service_id')->nullable()->constrained()->onDelete('set null');
             $table->string('description');
             $table->decimal('quantity', 8, 2)->default(1);

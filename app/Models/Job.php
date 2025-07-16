@@ -13,6 +13,8 @@ class Job extends Model
 {
     use HasFactory, LogsActivity;
 
+    protected $table = 'crm_jobs';
+
     protected $fillable = [
         'tenant_id',
         'customer_id',

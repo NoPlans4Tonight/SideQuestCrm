@@ -139,17 +139,13 @@ class SideQuestGo
         echo "   Generating application key...\n";
         $this->runDockerCommand("php artisan key:generate --force");
 
-        // Run migrations
-        echo "   Running database migrations...\n";
-        $this->runDockerCommand("php artisan migrate --force");
-
-        // Install Jetstream
+        // Install Jetstream (no --force)
         echo "   Installing Laravel Jetstream...\n";
-        $this->runDockerCommand("php artisan jetstream:install livewire --teams --force");
+        $this->runDockerCommand("php artisan jetstream:install livewire --teams");
 
-        // Run migrations again for Jetstream
-        echo "   Running Jetstream migrations...\n";
-        $this->runDockerCommand("php artisan migrate --force");
+        // Run fresh migrations after Jetstream install
+        echo "   Running database migrations (fresh)...\n";
+        $this->runDockerCommand("php artisan migrate:fresh --force");
 
         echo "✅ Laravel setup complete\n\n";
     }
@@ -231,15 +227,35 @@ class SideQuestGo
         return false;
     }
 
-    private function areServicesReady(): bool
+            private function areServicesReady(): bool
     {
         // Check if MySQL is ready
-        $mysqlReady = $this->runDockerCommand("mysqladmin ping -h db -u root -proot --silent", true);
+        $mysqlReady = $this->runDockerCommandFromContainer("db", "mysqladmin ping -h localhost -u root -proot --silent", true);
 
         // Check if Redis is ready
-        $redisReady = $this->runDockerCommand("redis-cli -h redis ping", true);
+        $redisReady = $this->runDockerCommandFromContainer("redis", "redis-cli ping", true);
 
         return $mysqlReady && $redisReady;
+    }
+
+    private function runDockerCommandFromContainer(string $container, string $command, bool $silent = false): bool
+    {
+        $fullCommand = "docker-compose exec -T {$container} {$command}";
+
+        if (!$silent) {
+            echo "   Running: {$command}\n";
+        }
+
+        $output = [];
+        $returnCode = 0;
+
+        exec($fullCommand . " 2>&1", $output, $returnCode);
+
+        if (!$silent && $returnCode !== 0) {
+            throw new Exception("Command failed: " . implode("\n", $output));
+        }
+
+        return $returnCode === 0;
     }
 
     private function runDockerCommand(string $command, bool $silent = false): bool

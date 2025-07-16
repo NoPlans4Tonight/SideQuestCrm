@@ -25,3 +25,5 @@ Thumbs.db
 .cache/
 .config/composer/.htaccess
 .local/share/composer/.htaccess
+.npm/
+.npm/_cache/
