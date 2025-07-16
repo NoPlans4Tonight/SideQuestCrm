@@ -5,7 +5,6 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\JobController;
-use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,21 +17,12 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 |
 */
 
-// Authentication routes (no middleware)
-Route::post('/login', [AuthenticatedSessionController::class, 'store']);
-Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->middleware('auth:sanctum');
-
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
-
-// Dashboard API
-Route::middleware('auth:sanctum')->group(function () {
+// Protected routes (authentication required)
+Route::middleware('auth:web')->group(function () {
+    Route::get('/user', function (Request $request) {
+        return response()->json(['user' => $request->user()]);
+    });
     Route::get('/dashboard', [DashboardController::class, 'index']);
-
-    // Customer API routes
     Route::apiResource('customers', CustomerController::class);
-
-    // Job API routes
     Route::apiResource('jobs', JobController::class);
 });
