@@ -158,8 +158,13 @@ class SideQuestGo
         $this->runDockerCommand("npm run build");
 
         echo "✅ Frontend assets built for development\n";
-        echo "   🔧 To start Vue DevTools with hot reload, run: composer sidequest:dev\n";
-        echo "   🔧 Then access: http://localhost:5173 for debugging\n\n";
+        echo "   🔧 Starting Vite dev server with hot reload...\n";
+
+        // Start Vite dev server in background
+        $this->startViteDevServer();
+
+        echo "✅ Vite dev server started\n";
+        echo "   🔧 Vue DevTools available at: http://localhost:5173\n\n";
     }
 
     private function displaySuccess(): void
@@ -169,7 +174,7 @@ class SideQuestGo
         echo "\n";
         echo "📋 Your SideQuest CRM is ready:\n";
         echo "   🌐 Main Application: http://localhost:8000\n";
-        echo "   🔧 Vue DevTools: Run 'composer sidequest:dev' then visit http://localhost:5173\n";
+        echo "   🔧 Vue DevTools: http://localhost:5173 (with hot reload)\n";
         echo "   📧 MailHog (Email Testing): http://localhost:8025\n";
         echo "   🗄️ MySQL Database: localhost:3306\n";
         echo "   🔴 Redis Cache: localhost:6379\n";
@@ -183,7 +188,7 @@ class SideQuestGo
         echo "🛠️ Useful commands:\n";
         echo "   composer sidequest:down    - Stop all services\n";
         echo "   composer sidequest:restart - Restart all services\n";
-        echo "   composer sidequest:dev     - Start Vue dev server with hot reload\n";
+        echo "   composer sidequest:dev     - Restart Vue dev server (if needed)\n";
         echo "   composer sidequest:build   - Build for production deployment\n";
         echo "   docker-compose logs -f     - View live logs\n";
         echo "\n";
@@ -283,6 +288,36 @@ class SideQuestGo
         }
 
         return $returnCode === 0;
+    }
+
+    private function startViteDevServer(): void
+    {
+        // Start Vite dev server in background
+        $command = "docker-compose exec -d app npm run dev";
+
+        $output = [];
+        $returnCode = 0;
+
+        exec($command . " 2>&1", $output, $returnCode);
+
+        // Give it a moment to start
+        sleep(3);
+
+        // Check if it's running
+        if (!$this->isViteDevServerRunning()) {
+            echo "   ⚠️  Vite dev server may not have started properly\n";
+            echo "   💡 You can manually start it with: composer sidequest:dev\n";
+        }
+    }
+
+    private function isViteDevServerRunning(): bool
+    {
+        $connection = @fsockopen('localhost', 5173, $errno, $errstr, 2);
+        if (is_resource($connection)) {
+            fclose($connection);
+            return true;
+        }
+        return false;
     }
 }
 
