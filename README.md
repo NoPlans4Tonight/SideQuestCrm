@@ -2,6 +2,8 @@
 
 A CRM system built for independent contractors and handymen to organize their side jobs. Turn your hobby work into organized, professional business operations.
 
+![SideQuest CRM Dashboard](dashboard-screenshot.png)
+
 ## What It Does
 
 SideQuest CRM helps contractors, handymen, and side-hustle professionals:
