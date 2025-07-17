@@ -4,17 +4,26 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
+use App\Services\CustomerService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
 class CustomerController extends Controller
 {
+    public function __construct(
+        private CustomerService $customerService
+    )
+    {
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $customers = Customer::withCount('jobs')->orderBy('first_name')->orderBy('last_name')->paginate(15);
+        $user = auth()->user();
+        $customers = $this->customerService->getCustomers($user->tenant_id, 15);
+
         return response()->json([
             'data' => $customers->items(),
             'meta' => [
@@ -34,23 +43,12 @@ class CustomerController extends Controller
     public function store(Request $request)
     {
         try {
-            $validated = $request->validate([
-                'first_name' => 'required|string|max:255',
-                'last_name' => 'required|string|max:255',
-                'email' => 'nullable|email|max:255',
-                'phone' => 'nullable|string|max:20',
-                'address' => 'nullable|string|max:500',
-                'city' => 'nullable|string|max:255',
-                'state' => 'nullable|string|max:255',
-                'zip_code' => 'nullable|string|max:20',
-                'country' => 'nullable|string|max:255',
-                'notes' => 'nullable|string|max:1000',
-                'status' => 'nullable|string|in:active,inactive,prospect',
-                'source' => 'nullable|string|max:255',
-                'assigned_to' => 'nullable|exists:users,id',
-            ]);
-
-            $customer = Customer::create($validated);
+            $user = auth()->user();
+            $customer = $this->customerService->createCustomer(
+                $request->all(),
+                $user->tenant_id,
+                $user->id
+            );
 
             return response()->json([
                 'message' => 'Customer created successfully',
@@ -81,27 +79,11 @@ class CustomerController extends Controller
     public function update(Request $request, Customer $customer)
     {
         try {
-            $validated = $request->validate([
-                'first_name' => 'required|string|max:255',
-                'last_name' => 'required|string|max:255',
-                'email' => 'nullable|email|max:255',
-                'phone' => 'nullable|string|max:20',
-                'address' => 'nullable|string|max:500',
-                'city' => 'nullable|string|max:255',
-                'state' => 'nullable|string|max:255',
-                'zip_code' => 'nullable|string|max:20',
-                'country' => 'nullable|string|max:255',
-                'notes' => 'nullable|string|max:1000',
-                'status' => 'nullable|string|in:active,inactive,prospect',
-                'source' => 'nullable|string|max:255',
-                'assigned_to' => 'nullable|exists:users,id',
-            ]);
-
-            $customer->update($validated);
+            $updatedCustomer = $this->customerService->updateCustomer($customer->id, $request->all());
 
             return response()->json([
                 'message' => 'Customer updated successfully',
-                'data' => $customer
+                'data' => $updatedCustomer
             ]);
         } catch (ValidationException $e) {
             return response()->json([
@@ -116,7 +98,7 @@ class CustomerController extends Controller
      */
     public function destroy(Customer $customer)
     {
-        $customer->delete();
+        $this->customerService->deleteCustomer($customer->id);
 
         return response()->json([
             'message' => 'Customer deleted successfully'
