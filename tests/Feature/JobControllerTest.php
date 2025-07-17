@@ -70,7 +70,7 @@ class JobControllerTest extends TestCase
             'title' => 'Test Job',
             'description' => 'This is a test job description',
             'customer_id' => $customer->id,
-            'status' => 'pending',
+            'status' => 'scheduled', // Change from 'pending' to 'scheduled'
             'priority' => 'medium',
             'scheduled_date' => '2024-01-15',
             'estimated_hours' => 5.5,
@@ -109,7 +109,7 @@ class JobControllerTest extends TestCase
                     'title' => 'Test Job',
                     'description' => 'This is a test job description',
                     'customer_id' => $customer->id,
-                    'status' => 'pending',
+                    'status' => 'scheduled',
                     'priority' => 'medium',
                 ]
             ]);
@@ -160,35 +160,40 @@ class JobControllerTest extends TestCase
 
         $job = Job::factory()->create([
             'customer_id' => $customer->id,
+            'tenant_id' => $this->tenant->id,
         ]);
 
         $response = $this->getJson("/api/jobs/{$job->id}");
 
         $response->assertStatus(200)
             ->assertJsonStructure([
-                'id',
-                'title',
-                'description',
-                'customer_id',
-                'status',
-                'priority',
-                'scheduled_date',
-                'estimated_hours',
-                'price',
-                'notes',
-                'created_at',
-                'updated_at',
-                'customer' => [
+                'data' => [
                     'id',
-                    'first_name',
-                    'last_name',
+                    'title',
+                    'description',
+                    'customer_id',
+                    'status',
+                    'priority',
+                    'scheduled_date',
+                    'estimated_hours',
+                    'price',
+                    'notes',
+                    'created_at',
+                    'updated_at',
+                    'customer' => [
+                        'id',
+                        'first_name',
+                        'last_name',
+                    ]
                 ]
             ])
             ->assertJson([
-                'id' => $job->id,
-                'title' => $job->title,
-                'description' => $job->description,
-                'customer_id' => $customer->id,
+                'data' => [
+                    'id' => $job->id,
+                    'title' => $job->title,
+                    'description' => $job->description,
+                    'customer_id' => $customer->id,
+                ]
             ]);
     }
 
@@ -211,7 +216,8 @@ class JobControllerTest extends TestCase
 
         $job = Job::factory()->create([
             'customer_id' => $customer->id,
-            'status' => 'pending',
+            'tenant_id' => $this->tenant->id,
+            'status' => 'scheduled',
         ]);
 
         $updateData = [
@@ -279,6 +285,7 @@ class JobControllerTest extends TestCase
 
         $job = Job::factory()->create([
             'customer_id' => $customer->id,
+            'tenant_id' => $this->tenant->id,
             'status' => 'in_progress',
         ]);
 
@@ -313,6 +320,7 @@ class JobControllerTest extends TestCase
 
         $job = Job::factory()->create([
             'customer_id' => $customer->id,
+            'tenant_id' => $this->tenant->id,
         ]);
 
         $invalidData = [
@@ -368,6 +376,7 @@ class JobControllerTest extends TestCase
 
         $job = Job::factory()->create([
             'customer_id' => $customer->id,
+            'tenant_id' => $this->tenant->id,
         ]);
 
         $response = $this->deleteJson("/api/jobs/{$job->id}");
@@ -403,6 +412,7 @@ class JobControllerTest extends TestCase
 
         $job = Job::factory()->create([
             'customer_id' => $customer->id,
+            'tenant_id' => $this->tenant->id,
         ]);
 
         $response = $this->getJson("/api/jobs/{$job->id}");
