@@ -53,10 +53,11 @@
                   required
                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                 >
-                  <option value="pending">Pending</option>
+                  <option value="scheduled">Scheduled</option>
                   <option value="in_progress">In Progress</option>
                   <option value="completed">Completed</option>
                   <option value="cancelled">Cancelled</option>
+                  <option value="on_hold">On Hold</option>
                 </select>
                 <p v-if="errors.status" class="mt-1 text-sm text-red-600">{{ errors.status[0] }}</p>
               </div>
@@ -184,7 +185,7 @@ const form = ref({
   title: '',
   description: '',
   customer_id: '',
-  status: 'pending',
+  status: 'scheduled',
   priority: 'medium',
   scheduled_date: '',
   estimated_hours: '',
