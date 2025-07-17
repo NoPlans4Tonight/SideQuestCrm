@@ -26,29 +26,20 @@ class JobFactory extends Factory
     public function definition(): array
     {
         return [
+            'tenant_id' => 1, // Should be set in test using state()
+            'customer_id' => 1, // Should be set in test using state()
+            'created_by' => 1, // Should be set in test using state() if needed
             'title' => $this->faker->sentence(3),
             'description' => $this->faker->paragraph(),
-            'customer_id' => Customer::factory(),
-            'status' => $this->faker->randomElement(['pending', 'in_progress', 'completed', 'cancelled']),
+            'status' => $this->faker->randomElement(['scheduled', 'in_progress', 'completed', 'cancelled', 'on_hold']),
             'priority' => $this->faker->randomElement(['low', 'medium', 'high', 'urgent']),
             'scheduled_date' => $this->faker->optional()->dateTimeBetween('now', '+30 days'),
             'estimated_hours' => $this->faker->optional()->randomFloat(1, 1, 40),
             'price' => $this->faker->optional()->randomFloat(2, 50, 5000),
-            'total_cost' => $this->faker->optional()->randomFloat(2, 50, 5000),
+            'total_cost' => $this->faker->randomFloat(2, 50, 5000),
             'notes' => $this->faker->optional()->paragraph(),
             'completed_at' => null,
         ];
-    }
-
-    /**
-     * Indicate that the job is pending.
-     */
-    public function pending(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'status' => 'pending',
-            'completed_at' => null,
-        ]);
     }
 
     /**
