@@ -83,8 +83,8 @@ router.beforeEach(async (to, from, next) => {
   const { useAuthStore } = await import('@/stores/authStore');
   const authStore = useAuthStore();
 
-  // Only initialize auth if we haven't tried yet and we're not going to login
-  if (!authStore.getIsAuthenticated && authStore.getUser === null && to.path !== '/login') {
+  // Always initialize auth if we haven't tried yet
+  if (authStore.getUser === null) {
     try {
       await authStore.initializeAuth();
     } catch (error) {
@@ -93,13 +93,20 @@ router.beforeEach(async (to, from, next) => {
     }
   }
 
+  // Redirect authenticated users away from guest-only routes
+  if (to.meta.requiresGuest && authStore.getIsAuthenticated) {
+    next('/');
+    return;
+  }
+
+  // Redirect unauthenticated users away from protected routes
   if (to.meta.requiresAuth && !authStore.getIsAuthenticated) {
     next('/login');
-  } else if (to.meta.requiresGuest && authStore.getIsAuthenticated) {
-    next('/');
-  } else {
-    next();
+    return;
   }
+
+  // Allow navigation
+  next();
 });
 
 export default router;
