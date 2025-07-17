@@ -23,6 +23,14 @@ class JobResource extends JsonResource
             'notes' => $this->notes,
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
+            'assigned_to' => $this->assigned_to,
+            'assigned_user' => $this->whenLoaded('assignedUser', function () {
+                return [
+                    'id' => $this->assignedUser->id,
+                    'name' => $this->assignedUser->name,
+                    'email' => $this->assignedUser->email,
+                ];
+            }),
             'customer' => $this->whenLoaded('customer', function () {
                 return [
                     'id' => $this->customer->id,

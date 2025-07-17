@@ -17,7 +17,7 @@ class JobController extends Controller
      */
     public function index()
     {
-        $jobs = Job::with('customer')->orderBy('created_at', 'desc')->paginate(15);
+        $jobs = Job::with(['customer', 'assignedUser'])->orderBy('created_at', 'desc')->paginate(15);
         return response()->json($jobs);
     }
 
@@ -37,6 +37,7 @@ class JobController extends Controller
                 'estimated_hours' => 'nullable|numeric|min:0',
                 'price' => 'nullable|numeric|min:0',
                 'notes' => 'nullable|string|max:1000',
+                'assigned_to' => 'nullable|exists:users,id',
             ]);
 
             $validated['tenant_id'] = auth()->user()->tenant_id;
@@ -44,7 +45,7 @@ class JobController extends Controller
             $validated['total_cost'] = $validated['price'] ?? 0; // Set total_cost to price or 0
 
             $job = Job::create($validated);
-            $job->load('customer');
+            $job->load(['customer', 'assignedUser']);
 
             return response()->json([
                 'message' => 'Job created successfully',
@@ -63,7 +64,7 @@ class JobController extends Controller
      */
     public function show($id)
     {
-        $job = Job::with('customer')->find($id);
+        $job = Job::with(['customer', 'assignedUser'])->find($id);
         if (!$job) {
             return response()->json(['message' => 'Job not found'], 404);
         }
@@ -90,6 +91,7 @@ class JobController extends Controller
                 'estimated_hours' => 'nullable|numeric|min:0',
                 'price' => 'nullable|numeric|min:0',
                 'notes' => 'nullable|string|max:1000',
+                'assigned_to' => 'nullable|exists:users,id',
             ]);
 
             // Set completed_at when status changes to completed
@@ -100,7 +102,7 @@ class JobController extends Controller
             $validated['total_cost'] = $validated['price'] ?? $job->total_cost; // Set total_cost to price or keep existing
 
             $job->update($validated);
-            $job->load('customer');
+            $job->load(['customer', 'assignedUser']);
 
             return response()->json([
                 'message' => 'Job updated successfully',
