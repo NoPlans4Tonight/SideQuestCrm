@@ -8,6 +8,7 @@ use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
+use App\Http\Resources\JobResource;
 
 class JobController extends Controller
 {
@@ -30,7 +31,7 @@ class JobController extends Controller
                 'title' => 'required|string|max:255',
                 'description' => 'required|string|max:1000',
                 'customer_id' => 'required|exists:customers,id',
-                'status' => 'required|in:pending,in_progress,completed,cancelled',
+                'status' => 'required|in:scheduled,in_progress,completed,cancelled,on_hold',
                 'priority' => 'required|in:low,medium,high,urgent',
                 'scheduled_date' => 'nullable|date',
                 'estimated_hours' => 'nullable|numeric|min:0',
@@ -38,11 +39,16 @@ class JobController extends Controller
                 'notes' => 'nullable|string|max:1000',
             ]);
 
+            $validated['tenant_id'] = auth()->user()->tenant_id;
+            $validated['created_by'] = auth()->id();
+            $validated['total_cost'] = $validated['price'] ?? 0; // Set total_cost to price or 0
+
             $job = Job::create($validated);
+            $job->load('customer');
 
             return response()->json([
                 'message' => 'Job created successfully',
-                'job' => $job->load('customer')
+                'job' => new JobResource($job)
             ], 201);
         } catch (ValidationException $e) {
             return response()->json([
@@ -55,23 +61,30 @@ class JobController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Job $job)
+    public function show($id)
     {
-        $job->load('customer');
-        return response()->json($job);
+        $job = Job::with('customer')->find($id);
+        if (!$job) {
+            return response()->json(['message' => 'Job not found'], 404);
+        }
+        return new JobResource($job);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Job $job)
+    public function update(Request $request, $id)
     {
+        $job = Job::find($id);
+        if (!$job) {
+            return response()->json(['message' => 'Job not found'], 404);
+        }
         try {
             $validated = $request->validate([
                 'title' => 'required|string|max:255',
                 'description' => 'required|string|max:1000',
                 'customer_id' => 'required|exists:customers,id',
-                'status' => 'required|in:pending,in_progress,completed,cancelled',
+                'status' => 'required|in:scheduled,in_progress,completed,cancelled,on_hold',
                 'priority' => 'required|in:low,medium,high,urgent',
                 'scheduled_date' => 'nullable|date',
                 'estimated_hours' => 'nullable|numeric|min:0',
@@ -84,11 +97,14 @@ class JobController extends Controller
                 $validated['completed_at'] = Carbon::now();
             }
 
+            $validated['total_cost'] = $validated['price'] ?? $job->total_cost; // Set total_cost to price or keep existing
+
             $job->update($validated);
+            $job->load('customer');
 
             return response()->json([
                 'message' => 'Job updated successfully',
-                'job' => $job->load('customer')
+                'job' => new JobResource($job)
             ]);
         } catch (ValidationException $e) {
             return response()->json([
@@ -101,10 +117,13 @@ class JobController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Job $job)
+    public function destroy($id)
     {
+        $job = Job::find($id);
+        if (!$job) {
+            return response()->json(['message' => 'Job not found'], 404);
+        }
         $job->delete();
-
         return response()->json([
             'message' => 'Job deleted successfully'
         ]);
