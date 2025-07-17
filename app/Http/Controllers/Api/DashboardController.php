@@ -25,33 +25,35 @@ class DashboardController extends Controller
             $upcomingJobs = collect();
             $recentActivity = collect();
 
-            // Check if tables exist before querying
-            if (Schema::hasTable('customers')) {
-                $totalCustomers = Customer::count();
-            }
+            // Query customers
+            $totalCustomers = Customer::where('tenant_id', $user->tenant_id)->count();
 
-            if (Schema::hasTable('crm_jobs')) {
-                $activeJobs = Job::where('status', '!=', 'completed')->count();
-                $completedThisMonth = Job::where('status', 'completed')
-                    ->whereMonth('completed_at', Carbon::now()->month)
-                    ->whereYear('completed_at', Carbon::now()->year)
-                    ->count();
+            // Query jobs
+            $activeJobs = Job::where('tenant_id', $user->tenant_id)
+                ->where('status', '!=', 'completed')
+                ->count();
+            $completedThisMonth = Job::where('tenant_id', $user->tenant_id)
+                ->where('status', 'completed')
+                ->whereMonth('completed_at', Carbon::now()->month)
+                ->whereYear('completed_at', Carbon::now()->year)
+                ->count();
 
-                // Calculate revenue for this month (using total_cost field)
-                $revenueThisMonth = Job::where('status', 'completed')
-                    ->whereMonth('completed_at', Carbon::now()->month)
-                    ->whereYear('completed_at', Carbon::now()->year)
-                    ->sum('total_cost') ?? 0;
+            // Calculate revenue for this month (using total_cost field)
+            $revenueThisMonth = Job::where('tenant_id', $user->tenant_id)
+                ->where('status', 'completed')
+                ->whereMonth('completed_at', Carbon::now()->month)
+                ->whereYear('completed_at', Carbon::now()->year)
+                ->sum('total_cost') ?? 0;
 
-                // Get upcoming jobs (scheduled for today or future)
-                $upcomingJobs = Job::where('scheduled_date', '>=', Carbon::today())
-                    ->where('status', '!=', 'completed')
-                    ->where('status', '!=', 'cancelled')
-                    ->with('customer')
-                    ->orderBy('scheduled_date')
-                    ->limit(5)
-                    ->get();
-            }
+            // Get upcoming jobs (scheduled for today or future)
+            $upcomingJobs = Job::where('tenant_id', $user->tenant_id)
+                ->where('scheduled_date', '>=', Carbon::today())
+                ->where('status', '!=', 'completed')
+                ->where('status', '!=', 'cancelled')
+                ->with('customer')
+                ->orderBy('scheduled_date')
+                ->limit(5)
+                ->get();
 
             return response()->json([
                 'user' => [
@@ -68,6 +70,12 @@ class DashboardController extends Controller
                 'recentActivity' => $recentActivity
             ]);
         } catch (\Exception $e) {
+            // Log the error for debugging
+            \Log::error('Dashboard error: ' . $e->getMessage(), [
+                'user_id' => Auth::id(),
+                'exception' => $e
+            ]);
+
             return response()->json([
                 'error' => 'Dashboard data could not be loaded',
                 'message' => $e->getMessage()
