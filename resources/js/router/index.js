@@ -8,6 +8,9 @@ import JobList from '@/views/Jobs/JobList.vue';
 import JobCreate from '@/views/Jobs/JobCreate.vue';
 import JobEdit from '@/views/Jobs/JobEdit.vue';
 import JobShow from '@/views/Jobs/JobShow.vue';
+import ServiceList from '@/views/Services/ServiceList.vue';
+import ServiceCreate from '@/views/Services/ServiceCreate.vue';
+import ServiceEdit from '@/views/Services/ServiceEdit.vue';
 
 const routes = [
   {
@@ -68,6 +71,24 @@ const routes = [
     path: '/jobs/:id/edit',
     name: 'jobs.edit',
     component: JobEdit,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/services',
+    name: 'services.index',
+    component: ServiceList,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/services/create',
+    name: 'services.create',
+    component: ServiceCreate,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/services/:id/edit',
+    name: 'services.edit',
+    component: ServiceEdit,
     meta: { requiresAuth: true }
   }
 ];

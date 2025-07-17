@@ -38,8 +38,8 @@
                 >
                   <option value="">Select a customer</option>
                   <option v-for="customer in customers" :key="customer.id" :value="customer.id">
-                    {{ customer.name }}
-                  </option>
+                    {{ customer.full_name || (customer.first_name + ' ' + customer.last_name) }}
+                </option>
                 </select>
                 <p v-if="errors.customer_id" class="mt-1 text-sm text-red-600">{{ errors.customer_id[0] }}</p>
               </div>
@@ -118,6 +118,22 @@
                 />
                 <p v-if="errors.price" class="mt-1 text-sm text-red-600">{{ errors.price[0] }}</p>
               </div>
+
+              <!-- Assigned Worker -->
+              <div>
+                <label for="assigned_to" class="block text-sm font-medium text-gray-700">Assign To</label>
+                <select
+                  id="assigned_to"
+                  v-model="form.assigned_to"
+                  class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                >
+                  <option value="">Unassigned</option>
+                  <option v-for="worker in workers" :key="worker.id" :value="worker.id">
+                    {{ worker.name }}
+                  </option>
+                </select>
+                <p v-if="errors.assigned_to" class="mt-1 text-sm text-red-600">{{ errors.assigned_to[0] }}</p>
+              </div>
             </div>
 
             <!-- Description -->
@@ -180,6 +196,7 @@ const router = useRouter()
 const loading = ref(false)
 const customers = ref([])
 const errors = ref({})
+const workers = ref([])
 
 const form = ref({
   title: '',
@@ -190,11 +207,13 @@ const form = ref({
   scheduled_date: '',
   estimated_hours: '',
   price: '',
-  notes: ''
+  notes: '',
+  assigned_to: ''
 })
 
 onMounted(async () => {
   await loadCustomers()
+  await loadWorkers()
 })
 
 const loadCustomers = async () => {
@@ -213,6 +232,24 @@ const loadCustomers = async () => {
     }
   } catch (error) {
     console.error('Error loading customers:', error)
+  }
+}
+
+const loadWorkers = async () => {
+  try {
+    const response = await fetch('/api/users', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    })
+    if (response.ok) {
+      const data = await response.json()
+      workers.value = data.data || []
+    }
+  } catch (error) {
+    console.error('Error loading workers:', error)
   }
 }
 
