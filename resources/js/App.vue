@@ -69,7 +69,7 @@
       </div>
 
       <!-- Responsive Navigation Menu -->
-      <div :class="{'block': mobileMenuOpen, 'hidden': !mobileMenuOpen}" class="hidden sm:hidden">
+      <div :class="{'block': mobileMenuOpen, 'hidden': !mobileMenuOpen}" class="sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
           <router-link
             to="/"
