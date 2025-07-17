@@ -23,6 +23,8 @@ return new class extends Migration
             $table->foreignId('assigned_to')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignId('created_by')->constrained('users')->onDelete('cascade');
             $table->date('scheduled_date')->nullable();
+            $table->decimal('estimated_hours', 8, 2)->nullable();
+            $table->decimal('price', 12, 2)->nullable();
             $table->timestamp('started_at')->nullable();
             $table->timestamp('completed_at')->nullable();
             $table->decimal('total_hours', 8, 2)->default(0);
