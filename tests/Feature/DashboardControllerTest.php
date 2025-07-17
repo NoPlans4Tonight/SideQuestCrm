@@ -27,28 +27,28 @@ class DashboardControllerTest extends TestCase
         // Create jobs with different statuses
         Job::factory()->count(3)->create([
             'customer_id' => $customer->id,
-            'status' => 'pending',
+            'tenant_id' => $this->tenant->id,
+            'status' => 'scheduled',
+            'scheduled_date' => Carbon::tomorrow(), // These are the upcoming jobs
         ]);
 
         Job::factory()->count(2)->create([
             'customer_id' => $customer->id,
+            'tenant_id' => $this->tenant->id,
             'status' => 'in_progress',
+            'scheduled_date' => null, // Ensure these don't appear in upcoming jobs
         ]);
 
         // Create completed jobs for this month
         Job::factory()->count(4)->create([
             'customer_id' => $customer->id,
+            'tenant_id' => $this->tenant->id,
             'status' => 'completed',
             'completed_at' => Carbon::now(),
             'total_cost' => 1000.00,
         ]);
 
-        // Create upcoming jobs
-        Job::factory()->count(3)->create([
-            'customer_id' => $customer->id,
-            'status' => 'pending',
-            'scheduled_date' => Carbon::tomorrow(),
-        ]);
+        // Remove the separate "upcoming jobs" creation since they're the same as the scheduled jobs above
 
         $response = $this->getJson('/api/dashboard');
 
@@ -88,7 +88,7 @@ class DashboardControllerTest extends TestCase
 
         // Assert statistics
         $this->assertEquals(6, $responseData['stats']['totalCustomers']); // 5 + 1 customer
-        $this->assertEquals(5, $responseData['stats']['activeJobs']); // 3 pending + 2 in_progress
+        $this->assertEquals(5, $responseData['stats']['activeJobs']); // 3 scheduled + 2 in_progress
         $this->assertEquals(4, $responseData['stats']['completedThisMonth']);
         $this->assertEquals(4000.00, $responseData['stats']['revenueThisMonth']); // 4 * 1000.00
 
@@ -130,6 +130,7 @@ class DashboardControllerTest extends TestCase
         // Create completed job scheduled for tomorrow (should be excluded)
         Job::factory()->create([
             'customer_id' => $customer->id,
+            'tenant_id' => $this->tenant->id,
             'status' => 'completed',
             'scheduled_date' => Carbon::tomorrow(),
         ]);
@@ -137,14 +138,16 @@ class DashboardControllerTest extends TestCase
         // Create cancelled job scheduled for tomorrow (should be excluded)
         Job::factory()->create([
             'customer_id' => $customer->id,
+            'tenant_id' => $this->tenant->id,
             'status' => 'cancelled',
             'scheduled_date' => Carbon::tomorrow(),
         ]);
 
-        // Create pending job scheduled for tomorrow (should be included)
+        // Create scheduled job scheduled for tomorrow (should be included)
         Job::factory()->create([
             'customer_id' => $customer->id,
-            'status' => 'pending',
+            'tenant_id' => $this->tenant->id,
+            'status' => 'scheduled',
             'scheduled_date' => Carbon::tomorrow(),
         ]);
 
@@ -154,7 +157,7 @@ class DashboardControllerTest extends TestCase
 
         $upcomingJobs = $response->json('upcomingJobs');
         $this->assertCount(1, $upcomingJobs);
-        $this->assertEquals('pending', $upcomingJobs[0]['status']);
+        $this->assertEquals('scheduled', $upcomingJobs[0]['status']);
     }
 
     public function test_index_only_counts_jobs_from_current_month_for_completed_stats(): void
@@ -168,6 +171,7 @@ class DashboardControllerTest extends TestCase
         // Create completed job from last month
         Job::factory()->create([
             'customer_id' => $customer->id,
+            'tenant_id' => $this->tenant->id,
             'status' => 'completed',
             'completed_at' => Carbon::now()->subMonth(),
             'total_cost' => 500.00,
@@ -176,6 +180,7 @@ class DashboardControllerTest extends TestCase
         // Create completed job from this month
         Job::factory()->create([
             'customer_id' => $customer->id,
+            'tenant_id' => $this->tenant->id,
             'status' => 'completed',
             'completed_at' => Carbon::now(),
             'total_cost' => 1000.00,
@@ -201,7 +206,8 @@ class DashboardControllerTest extends TestCase
         // Create 7 upcoming jobs
         Job::factory()->count(7)->create([
             'customer_id' => $customer->id,
-            'status' => 'pending',
+            'tenant_id' => $this->tenant->id,
+            'status' => 'scheduled',
             'scheduled_date' => Carbon::tomorrow(),
         ]);
 
@@ -224,19 +230,22 @@ class DashboardControllerTest extends TestCase
         // Create jobs with different scheduled dates
         $job3 = Job::factory()->create([
             'customer_id' => $customer->id,
-            'status' => 'pending',
+            'tenant_id' => $this->tenant->id,
+            'status' => 'scheduled',
             'scheduled_date' => Carbon::now()->addDays(3),
         ]);
 
         $job1 = Job::factory()->create([
             'customer_id' => $customer->id,
-            'status' => 'pending',
+            'tenant_id' => $this->tenant->id,
+            'status' => 'scheduled',
             'scheduled_date' => Carbon::now()->addDay(),
         ]);
 
         $job2 = Job::factory()->create([
             'customer_id' => $customer->id,
-            'status' => 'pending',
+            'tenant_id' => $this->tenant->id,
+            'status' => 'scheduled',
             'scheduled_date' => Carbon::now()->addDays(2),
         ]);
 
@@ -257,9 +266,9 @@ class DashboardControllerTest extends TestCase
     {
         $this->authenticateUser();
 
-        // Mock a database error by temporarily dropping the customers table
-        // This test verifies the error handling in the controller
-        \DB::statement('DROP TABLE IF EXISTS customers');
+        // Mock a database error by temporarily dropping the jobs table
+        // This will cause an error when the controller tries to query jobs
+        \DB::statement('DROP TABLE IF EXISTS crm_jobs');
 
         $response = $this->getJson('/api/dashboard');
 
@@ -272,8 +281,8 @@ class DashboardControllerTest extends TestCase
                 'error' => 'Dashboard data could not be loaded',
             ]);
 
-        // Restore the table for other tests
-        $this->artisan('migrate:fresh');
+        // Don't try to restore the table - let the test framework handle it
+        // The RefreshDatabase trait will handle the cleanup
     }
 
     public function test_unauthenticated_request_is_rejected(): void
