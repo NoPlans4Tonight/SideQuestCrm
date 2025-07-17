@@ -30,6 +30,7 @@
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Scheduled</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned To</th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
@@ -40,7 +41,12 @@
                     <div class="text-sm text-gray-500">{{ truncate(job.description, 50) }}</div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-900">{{ job.customer?.name || 'N/A' }}</div>
+                    <div class="text-sm text-gray-900">
+                      <span v-if="job.customer">
+                        {{ job.customer.first_name }} {{ job.customer.last_name }}
+                      </span>
+                      <span v-else>N/A</span>
+                    </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <span :class="getStatusClasses(job.status)" class="inline-flex px-2 py-1 text-xs font-semibold rounded-full">
@@ -54,6 +60,14 @@
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="text-sm text-gray-900">{{ formatDate(job.scheduled_date) }}</div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900">
+                      <span v-if="job.assigned_user">
+                        {{ job.assigned_user.name }}
+                      </span>
+                      <span v-else>Unassigned</span>
+                    </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <button @click="$router.push(`/jobs/${job.id}`)" class="text-blue-600 hover:text-blue-900 mr-3">View</button>
