@@ -7,6 +7,7 @@ use App\Models\Customer;
 use App\Services\CustomerService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use App\Http\Resources\CustomerResource;
 
 class CustomerController extends Controller
 {
@@ -65,25 +66,29 @@ class CustomerController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Customer $customer)
+    public function show($id)
     {
-        $customer->load('jobs');
-        return response()->json([
-            'data' => $customer
-        ]);
+        $customer = Customer::with('jobs')->find($id);
+        if (!$customer) {
+            return response()->json(['message' => 'Customer not found'], 404);
+        }
+        return new CustomerResource($customer);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Customer $customer)
+    public function update(Request $request, $id)
     {
+        $customer = Customer::find($id);
+        if (!$customer) {
+            return response()->json(['message' => 'Customer not found'], 404);
+        }
         try {
             $updatedCustomer = $this->customerService->updateCustomer($customer->id, $request->all());
-
             return response()->json([
                 'message' => 'Customer updated successfully',
-                'data' => $updatedCustomer
+                'data' => new CustomerResource($updatedCustomer)
             ]);
         } catch (ValidationException $e) {
             return response()->json([
@@ -96,10 +101,13 @@ class CustomerController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Customer $customer)
+    public function destroy($id)
     {
+        $customer = Customer::find($id);
+        if (!$customer) {
+            return response()->json(['message' => 'Customer not found'], 404);
+        }
         $this->customerService->deleteCustomer($customer->id);
-
         return response()->json([
             'message' => 'Customer deleted successfully'
         ]);
