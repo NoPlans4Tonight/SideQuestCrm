@@ -332,10 +332,11 @@ const formatStatus = (status) => {
 
 const getStatusClasses = (status) => {
   const classes = {
-    pending: 'bg-yellow-100 text-yellow-800',
+    scheduled: 'bg-yellow-100 text-yellow-800',
     in_progress: 'bg-blue-100 text-blue-800',
     completed: 'bg-green-100 text-green-800',
-    cancelled: 'bg-red-100 text-red-800'
+    cancelled: 'bg-red-100 text-red-800',
+    on_hold: 'bg-gray-300 text-gray-900',
   }
   return classes[status] || 'bg-gray-100 text-gray-800'
 }
