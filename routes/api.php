@@ -25,4 +25,6 @@ Route::middleware('auth:web')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index']);
     Route::apiResource('customers', CustomerController::class);
     Route::apiResource('jobs', JobController::class);
+    Route::apiResource('services', \App\Http\Controllers\Api\ServiceController::class);
+    Route::apiResource('users', \App\Http\Controllers\Api\UserController::class);
 });
