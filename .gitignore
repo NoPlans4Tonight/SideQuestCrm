@@ -29,3 +29,4 @@ Thumbs.db
 .npm/_cache/
 psysh/
 cookies.txt
+coverage.xml

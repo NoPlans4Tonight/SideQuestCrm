@@ -5,11 +5,13 @@
     "php": "8.2",
     "build": [
         "composer install --no-dev --optimize-autoloader",
+        "composer install --dev",
         "npm ci",
         "npm run build",
         "php artisan config:cache",
         "php artisan route:cache",
-        "php artisan view:cache"
+        "php artisan view:cache",
+        "php artisan test --parallel --stop-on-failure --coverage-clover=coverage.xml"
     ],
     "deploy": [
         "php artisan migrate --force",
@@ -35,6 +37,7 @@
             "openssl",
             "pdo",
             "pdo_mysql",
+            "pdo_sqlite",
             "tokenizer",
             "xml"
         ]
