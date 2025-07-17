@@ -50,7 +50,7 @@ class DashboardController extends Controller
                 ->where('scheduled_date', '>=', Carbon::today())
                 ->where('status', '!=', 'completed')
                 ->where('status', '!=', 'cancelled')
-                ->with('customer')
+                ->with(['customer', 'assignedUser'])
                 ->orderBy('scheduled_date')
                 ->limit(5)
                 ->get();

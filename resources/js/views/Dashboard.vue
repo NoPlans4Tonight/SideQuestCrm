@@ -229,7 +229,12 @@
                     <div class="text-sm text-gray-500">{{ truncate(job.description, 50) }}</div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-900">{{ job.customer?.name || 'N/A' }}</div>
+                    <div class="text-sm text-gray-900">
+                      <span v-if="job.customer">
+                        {{ job.customer.first_name }} {{ job.customer.last_name }}
+                      </span>
+                      <span v-else>N/A</span>
+                    </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="text-sm text-gray-900">{{ formatDate(job.scheduled_date) }}</div>
