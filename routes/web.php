@@ -53,3 +53,32 @@ Route::get('/services', function () {
 Route::get('/services/{id}', function () {
     return view('app');
 });
+
+Route::get('/appointments', function () {
+    return view('app');
+});
+
+Route::get('/appointments/create', function () {
+    return view('app');
+});
+
+Route::get('/appointments/{id}', function () {
+    return view('app');
+});
+
+Route::get('/estimates', function () {
+    return view('app');
+});
+
+Route::get('/estimates/create', function () {
+    return view('app');
+});
+
+Route::get('/estimates/{id}', function () {
+    return view('app');
+});
+
+// Catch-all route for SPA - this should be the last route
+Route::get('/{any}', function () {
+    return view('app');
+})->where('any', '.*');
