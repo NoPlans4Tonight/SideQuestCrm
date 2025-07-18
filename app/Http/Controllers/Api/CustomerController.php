@@ -26,7 +26,7 @@ class CustomerController extends Controller
         $customers = $this->customerService->getCustomers($user->tenant_id, 15);
 
         return response()->json([
-            'data' => $customers->items(),
+            'data' => CustomerResource::collection($customers->items()),
             'meta' => [
                 'current_page' => $customers->currentPage(),
                 'last_page' => $customers->lastPage(),
