@@ -13,7 +13,7 @@
       <div class="mb-4">
         <span class="font-semibold">Customer:</span>
         <span v-if="job.customer">
-          {{ job.customer.first_name }} {{ job.customer.last_name }}
+          {{ job.customer.full_name || (job.customer.first_name + ' ' + job.customer.last_name) }}
         </span>
         <span v-else>—</span>
       </div>

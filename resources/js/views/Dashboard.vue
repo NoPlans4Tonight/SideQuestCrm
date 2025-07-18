@@ -24,6 +24,15 @@
               </svg>
               New Job
             </button>
+            <button
+              @click="$router.push('/appointments/create')"
+              class="inline-flex items-center px-4 py-2 bg-purple-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition ease-in-out duration-150"
+            >
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>
+              New Appointment
+            </button>
           </div>
         </div>
       </div>
@@ -39,7 +48,7 @@
       </div>
 
       <!-- Stats Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
         <div class="bg-white overflow-hidden shadow-sm rounded-lg">
           <div class="p-6">
             <div class="flex items-center">
@@ -99,6 +108,38 @@
               <div class="ml-4">
                 <p class="text-sm font-medium text-gray-500">Revenue This Month</p>
                 <p class="text-2xl font-semibold text-gray-900">${{ formatCurrency(stats.revenueThisMonth) }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white overflow-hidden shadow-sm rounded-lg">
+          <div class="p-6">
+            <div class="flex items-center">
+              <div class="flex-shrink-0">
+                <svg class="h-8 w-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+              </div>
+              <div class="ml-4">
+                <p class="text-sm font-medium text-gray-500">Pending Estimates</p>
+                <p class="text-2xl font-semibold text-gray-900">{{ stats.pendingEstimates }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white overflow-hidden shadow-sm rounded-lg">
+          <div class="p-6">
+            <div class="flex items-center">
+              <div class="flex-shrink-0">
+                <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+              </div>
+              <div class="ml-4">
+                <p class="text-sm font-medium text-gray-500">Sent Estimates</p>
+                <p class="text-2xl font-semibold text-gray-900">{{ stats.sentEstimates }}</p>
               </div>
             </div>
           </div>
@@ -173,6 +214,66 @@
                   <p class="text-sm text-gray-500">Manage work orders</p>
                 </div>
               </button>
+
+              <button
+                @click="$router.push('/appointments/create')"
+                class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors w-full text-left"
+              >
+                <div class="flex-shrink-0">
+                  <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                  </svg>
+                </div>
+                <div class="ml-4">
+                  <p class="text-sm font-medium text-gray-900">Schedule Appointment</p>
+                  <p class="text-sm text-gray-500">Book a new appointment</p>
+                </div>
+              </button>
+
+              <button
+                @click="$router.push('/appointments')"
+                class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors w-full text-left"
+              >
+                <div class="flex-shrink-0">
+                  <svg class="h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                  </svg>
+                </div>
+                <div class="ml-4">
+                  <p class="text-sm font-medium text-gray-900">View All Appointments</p>
+                  <p class="text-sm text-gray-500">Manage appointments</p>
+                </div>
+              </button>
+
+              <button
+                @click="$router.push('/estimates/create')"
+                class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors w-full text-left"
+              >
+                <div class="flex-shrink-0">
+                  <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                  </svg>
+                </div>
+                <div class="ml-4">
+                  <p class="text-sm font-medium text-gray-900">Create Estimate</p>
+                  <p class="text-sm text-gray-500">Generate a new estimate</p>
+                </div>
+              </button>
+
+              <button
+                @click="$router.push('/estimates')"
+                class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors w-full text-left"
+              >
+                <div class="flex-shrink-0">
+                  <svg class="h-6 w-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                  </svg>
+                </div>
+                <div class="ml-4">
+                  <p class="text-sm font-medium text-gray-900">View All Estimates</p>
+                  <p class="text-sm text-gray-500">Manage estimates</p>
+                </div>
+              </button>
             </div>
           </div>
         </div>
@@ -205,6 +306,76 @@
         </div>
       </div>
 
+      <!-- Upcoming Appointments -->
+      <div class="mt-8 bg-white overflow-hidden shadow-sm rounded-lg">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h3 class="text-lg font-medium text-gray-900">Upcoming Appointments</h3>
+        </div>
+        <div class="p-6">
+          <div v-if="upcomingAppointments.length > 0" class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Appointment</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr v-for="appointment in upcomingAppointments" :key="appointment.id">
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm font-medium text-gray-900">{{ appointment.title }}</div>
+                    <div class="text-sm text-gray-500">{{ truncate(appointment.description, 50) }}</div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900">
+                      <span v-if="appointment.customer">
+                        {{ appointment.customer.full_name || (appointment.customer.first_name + ' ' + appointment.customer.last_name) }}
+                      </span>
+                      <span v-else>N/A</span>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900">{{ formatDateTime(appointment.start_time) }}</div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                      {{ formatAppointmentType(appointment.appointment_type) }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span :class="getAppointmentStatusClasses(appointment.status)" class="inline-flex px-2 py-1 text-xs font-semibold rounded-full">
+                      {{ formatStatus(appointment.status) }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <button @click="$router.push(`/appointments/${appointment.id}`)" class="text-blue-600 hover:text-blue-900">View</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div v-else class="text-center py-8">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">No upcoming appointments</h3>
+            <p class="mt-1 text-sm text-gray-500">Create your first appointment to get started.</p>
+            <div class="mt-6">
+              <button
+                @click="$router.push('/appointments/create')"
+                class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+              >
+                Create Appointment
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Upcoming Jobs -->
       <div class="mt-8 bg-white overflow-hidden shadow-sm rounded-lg">
         <div class="px-6 py-4 border-b border-gray-200">
@@ -231,7 +402,7 @@
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="text-sm text-gray-900">
                       <span v-if="job.customer">
-                        {{ job.customer.first_name }} {{ job.customer.last_name }}
+                        {{ job.customer.full_name || (job.customer.first_name + ' ' + job.customer.last_name) }}
                       </span>
                       <span v-else>N/A</span>
                     </div>
@@ -284,6 +455,7 @@ const stats = ref({
   revenueThisMonth: 0
 })
 const upcomingJobs = ref([])
+const upcomingAppointments = ref([])
 const recentActivity = ref([])
 
 onMounted(async () => {
@@ -306,6 +478,7 @@ const loadDashboardData = async () => {
       const data = await response.json()
       stats.value = data.stats
       upcomingJobs.value = data.upcomingJobs
+      upcomingAppointments.value = data.upcomingAppointments
       recentActivity.value = data.recentActivity
     }
   } catch (error) {
@@ -344,5 +517,32 @@ const getStatusClasses = (status) => {
     on_hold: 'bg-gray-300 text-gray-900',
   }
   return classes[status] || 'bg-gray-100 text-gray-800'
+}
+
+const getAppointmentStatusClasses = (status) => {
+  const classes = {
+    scheduled: 'bg-yellow-100 text-yellow-800',
+    confirmed: 'bg-blue-100 text-blue-800',
+    completed: 'bg-green-100 text-green-800',
+    cancelled: 'bg-red-100 text-red-800',
+    no_show: 'bg-gray-100 text-gray-800',
+  }
+  return classes[status] || 'bg-gray-100 text-gray-800'
+}
+
+const formatDateTime = (dateTime) => {
+  if (!dateTime) return 'Not scheduled'
+  return new Date(dateTime).toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  })
+}
+
+const formatAppointmentType = (type) => {
+  return type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())
 }
 </script>

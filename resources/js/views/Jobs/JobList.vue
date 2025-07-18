@@ -43,7 +43,7 @@
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="text-sm text-gray-900">
                       <span v-if="job.customer">
-                        {{ job.customer.first_name }} {{ job.customer.last_name }}
+                        {{ job.customer.full_name || (job.customer.first_name + ' ' + job.customer.last_name) }}
                       </span>
                       <span v-else>N/A</span>
                     </div>
