@@ -11,6 +11,10 @@ import JobShow from '@/views/Jobs/JobShow.vue';
 import ServiceList from '@/views/Services/ServiceList.vue';
 import ServiceCreate from '@/views/Services/ServiceCreate.vue';
 import ServiceEdit from '@/views/Services/ServiceEdit.vue';
+import AppointmentList from '@/views/Appointments/AppointmentList.vue';
+import AppointmentCreate from '@/views/Appointments/AppointmentCreate.vue';
+import EstimateList from '@/views/Estimates/EstimateList.vue';
+import EstimateCreate from '@/views/Estimates/EstimateCreate.vue';
 
 const routes = [
   {
@@ -89,6 +93,30 @@ const routes = [
     path: '/services/:id/edit',
     name: 'services.edit',
     component: ServiceEdit,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/appointments',
+    name: 'appointments.index',
+    component: AppointmentList,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/appointments/create',
+    name: 'appointments.create',
+    component: AppointmentCreate,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/estimates',
+    name: 'estimates.index',
+    component: EstimateList,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/estimates/create',
+    name: 'estimates.create',
+    component: EstimateCreate,
     meta: { requiresAuth: true }
   }
 ];
