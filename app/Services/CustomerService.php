@@ -16,9 +16,14 @@ class CustomerService implements CustomerServiceInterface
         private CustomerRepositoryInterface $customerRepository
     ) {}
 
-    public function getCustomers(int $tenantId, int $perPage = 15): LengthAwarePaginator
+    public function getCustomers(int $tenantId, int $perPage = 15, array $with = []): LengthAwarePaginator
     {
-        return $this->customerRepository->paginateByTenant($tenantId, $perPage);
+        return $this->customerRepository->paginateByTenant($tenantId, $perPage, $with);
+    }
+
+    public function getCustomersWithSummary(int $tenantId, int $perPage = 15): LengthAwarePaginator
+    {
+        return $this->customerRepository->getCustomersWithSummary($tenantId, $perPage);
     }
 
     public function getCustomer(int $id): ?Customer

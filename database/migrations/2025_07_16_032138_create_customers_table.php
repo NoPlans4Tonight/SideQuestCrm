@@ -33,6 +33,9 @@ return new class extends Migration
             $table->index(['tenant_id', 'status']);
             $table->index(['tenant_id', 'assigned_to']);
             $table->index(['tenant_id', 'email']);
+            $table->index(['tenant_id', 'created_at']);
+            $table->index(['tenant_id', 'first_name', 'last_name']);
+            $table->index(['tenant_id', 'phone']);
         });
     }
 

@@ -19,10 +19,28 @@ class CustomerRepository implements CustomerRepositoryInterface
         return Customer::where('tenant_id', $tenantId)->get();
     }
 
-    public function paginateByTenant(int $tenantId, int $perPage = 15): LengthAwarePaginator
+    public function paginateByTenant(int $tenantId, int $perPage = 15, array $with = []): LengthAwarePaginator
+    {
+        $query = Customer::where('tenant_id', $tenantId)
+            ->orderBy('created_at', 'desc');
+
+        if (!empty($with)) {
+            $query->with($with);
+        }
+
+        return $query->paginate($perPage);
+    }
+
+    public function getCustomersWithSummary(int $tenantId, int $perPage = 15): LengthAwarePaginator
     {
         return Customer::where('tenant_id', $tenantId)
-            ->with(['assignedUser', 'createdBy'])
+            ->with([
+                'assignedUser:id,name,email',
+                'createdBy:id,name,email',
+                'appointments:id,customer_id,status,start_time,total_cost,service_id',
+                'appointments.service:id,name,description,base_price',
+                'estimates:id,customer_id,status,total_amount,subtotal,tax_amount,discount_amount,valid_until'
+            ])
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
     }
