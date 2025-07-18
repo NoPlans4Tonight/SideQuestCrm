@@ -23,7 +23,22 @@ class AppointmentController extends Controller
         $user = Auth::user();
         $perPage = $request->get('per_page', 15);
 
-        $appointments = $this->appointmentService->getAppointments($user->tenant_id, $perPage);
+        // Build filters from request parameters
+        $filters = [];
+        if ($request->has('date_from')) {
+            $filters['date_from'] = $request->get('date_from');
+        }
+        if ($request->has('date_to')) {
+            $filters['date_to'] = $request->get('date_to');
+        }
+        if ($request->has('status')) {
+            $filters['status'] = $request->get('status');
+        }
+        if ($request->has('assigned_to')) {
+            $filters['assigned_to'] = $request->get('assigned_to');
+        }
+
+        $appointments = $this->appointmentService->getAppointments($user->tenant_id, $perPage, $filters);
 
         return response()->json([
             'data' => AppointmentResource::collection($appointments->items()),
@@ -195,6 +210,7 @@ class AppointmentController extends Controller
         $startTime = $request->get('start_time');
         $endTime = $request->get('end_time');
         $excludeAppointmentId = $request->get('exclude_appointment_id');
+        $assignedTo = $request->get('assigned_to');
 
         if (!$startTime || !$endTime) {
             return response()->json([
@@ -206,7 +222,8 @@ class AppointmentController extends Controller
             $user->tenant_id,
             $startTime,
             $endTime,
-            $excludeAppointmentId
+            $excludeAppointmentId,
+            $assignedTo
         );
 
         return response()->json([

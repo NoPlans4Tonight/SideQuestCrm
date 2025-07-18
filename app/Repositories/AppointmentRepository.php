@@ -10,12 +10,31 @@ use Carbon\Carbon;
 
 class AppointmentRepository implements AppointmentRepositoryInterface
 {
-    public function getAppointments(int $tenantId, int $perPage = 15): LengthAwarePaginator
+    public function getAppointments(int $tenantId, int $perPage = 15, array $filters = []): LengthAwarePaginator
     {
-        return Appointment::where('tenant_id', $tenantId)
-            ->with(['customer', 'lead', 'estimate', 'assignedUser', 'createdBy'])
-            ->orderBy('start_time', 'desc')
-            ->paginate($perPage);
+        $query = Appointment::where('tenant_id', $tenantId)
+            ->with(['customer', 'lead', 'estimate', 'assignedUser', 'createdBy']);
+
+        // Apply date range filters if provided
+        if (isset($filters['date_from'])) {
+            $query->where('start_time', '>=', $filters['date_from']);
+        }
+
+        if (isset($filters['date_to'])) {
+            $query->where('start_time', '<=', $filters['date_to'] . ' 23:59:59');
+        }
+
+        // Apply status filter if provided
+        if (isset($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        // Apply assigned_to filter if provided
+        if (isset($filters['assigned_to'])) {
+            $query->where('assigned_to', $filters['assigned_to']);
+        }
+
+        return $query->orderBy('start_time', 'desc')->paginate($perPage);
     }
 
     public function getAppointmentById(int $id): ?Appointment
@@ -82,7 +101,7 @@ class AppointmentRepository implements AppointmentRepositoryInterface
             ->paginate($perPage);
     }
 
-    public function checkAvailability(int $tenantId, string $startTime, string $endTime, ?int $excludeAppointmentId = null): bool
+    public function checkAvailability(int $tenantId, string $startTime, string $endTime, ?int $excludeAppointmentId = null, ?int $assignedTo = null): bool
     {
         $query = Appointment::where('tenant_id', $tenantId)
             ->where('status', '!=', 'cancelled')
@@ -94,6 +113,11 @@ class AppointmentRepository implements AppointmentRepositoryInterface
                            ->where('end_time', '>=', $endTime);
                   });
             });
+
+        // If assigned_to is provided, only check conflicts for that specific user
+        if ($assignedTo) {
+            $query->where('assigned_to', $assignedTo);
+        }
 
         if ($excludeAppointmentId) {
             $query->where('id', '!=', $excludeAppointmentId);

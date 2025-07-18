@@ -38,15 +38,14 @@ class UserController extends Controller
             $startDate = $request->get('start_date', $date);
             $endDate = $request->get('end_date', $date);
 
-            // Get appointments for the user
+            // Get appointments for the user with proper date filtering
             $appointments = Appointment::with('customer')
                 ->where('assigned_to', $userId)
+                ->where('tenant_id', auth()->user()->tenant_id)
                 ->whereBetween('start_time', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
                 ->where('status', '!=', 'cancelled')
                 ->orderBy('start_time')
                 ->get();
-
-
 
             // Format the schedule data
             $schedule = [
@@ -74,7 +73,6 @@ class UserController extends Controller
                         ] : null
                     ];
                 }),
-
             ];
 
             return response()->json($schedule);

@@ -27,7 +27,19 @@ class CustomerController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
-        $result = $this->listingService->getCustomers($request, $user->tenant_id);
+
+        // Add caching for frequently accessed data
+        $cacheKey = "customers_{$user->tenant_id}_" . md5($request->fullUrl());
+        $cacheDuration = 300; // 5 minutes
+
+        // Don't cache if there are filters or specific parameters
+        if ($request->has('filter') || $request->has('search') || $request->get('per_page', 15) != 15) {
+            $result = $this->listingService->getCustomers($request, $user->tenant_id);
+        } else {
+            $result = cache()->remember($cacheKey, $cacheDuration, function () use ($request, $user) {
+                return $this->listingService->getCustomers($request, $user->tenant_id);
+            });
+        }
 
         return response()->json($result);
     }

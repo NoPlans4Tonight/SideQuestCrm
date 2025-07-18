@@ -55,10 +55,35 @@
               >
                 Today
               </button>
-              <div class="flex items-center space-x-2">
-                <div class="flex items-center">
-                  <div class="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
-                  <span class="text-sm text-gray-600">Appointments</span>
+              <button
+                @click="loadData"
+                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+              >
+                Refresh
+              </button>
+              <div class="flex items-center space-x-4">
+                <!-- Status Legend -->
+                <div class="flex items-center space-x-3">
+                  <div class="flex items-center">
+                    <div class="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+                    <span class="text-sm text-gray-600">Scheduled</span>
+                  </div>
+                  <div class="flex items-center">
+                    <div class="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                    <span class="text-sm text-gray-600">Confirmed</span>
+                  </div>
+                  <div class="flex items-center">
+                    <div class="w-3 h-3 bg-yellow-500 rounded-full mr-2"></div>
+                    <span class="text-sm text-gray-600">In Progress</span>
+                  </div>
+                  <div class="flex items-center">
+                    <div class="w-3 h-3 bg-gray-500 rounded-full mr-2"></div>
+                    <span class="text-sm text-gray-600">Completed</span>
+                  </div>
+                  <div class="flex items-center">
+                    <div class="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
+                    <span class="text-sm text-gray-600">Cancelled</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -115,13 +140,14 @@
                 v-for="appointment in getAppointmentsForDay(day.date)"
                 :key="`appointment-${appointment.id}`"
                 @click="viewAppointment(appointment.id)"
-                class="text-xs p-1 rounded cursor-pointer bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors"
+                :class="`text-xs p-1 rounded cursor-pointer border transition-colors hover:opacity-80 ${getAppointmentStatusColor(appointment.status)}`"
               >
-                <div class="font-medium truncate">{{ appointment.title }}</div>
-                <div class="text-blue-600">{{ formatTime(appointment.start_time) }}</div>
+                <div class="flex items-center justify-between">
+                  <div class="font-medium truncate flex-1">{{ appointment.title }}</div>
+                  <span class="text-xs ml-1">{{ getAppointmentStatusIcon(appointment.status) }}</span>
+                </div>
+                <div class="text-xs opacity-75">{{ formatTime(appointment.start_time) }}</div>
               </div>
-
-
             </div>
           </div>
         </div>
@@ -212,6 +238,34 @@ const calendarDays = computed(() => {
   return days
 })
 
+const getAppointmentStatusColor = (status) => {
+  const statusColors = {
+    'scheduled': 'bg-blue-100 text-blue-800 border-blue-200',
+    'confirmed': 'bg-green-100 text-green-800 border-green-200',
+    'in_progress': 'bg-yellow-100 text-yellow-800 border-yellow-200',
+    'completed': 'bg-gray-100 text-gray-800 border-gray-200',
+    'cancelled': 'bg-red-100 text-red-800 border-red-200',
+    'no_show': 'bg-orange-100 text-orange-800 border-orange-200',
+    'rescheduled': 'bg-purple-100 text-purple-800 border-purple-200'
+  }
+
+  return statusColors[status] || 'bg-gray-100 text-gray-800 border-gray-200'
+}
+
+const getAppointmentStatusIcon = (status) => {
+  const statusIcons = {
+    'scheduled': '📅',
+    'confirmed': '✅',
+    'in_progress': '🔄',
+    'completed': '✅',
+    'cancelled': '❌',
+    'no_show': '⏰',
+    'rescheduled': '📝'
+  }
+
+  return statusIcons[status] || '📅'
+}
+
 // Methods
 const loadData = async () => {
   try {
@@ -219,10 +273,16 @@ const loadData = async () => {
     const startOfMonth = new Date(currentDate.value.getFullYear(), currentDate.value.getMonth(), 1)
     const endOfMonth = new Date(currentDate.value.getFullYear(), currentDate.value.getMonth() + 1, 0)
 
+    const dateFrom = startOfMonth.toISOString().split('T')[0]
+    const dateTo = endOfMonth.toISOString().split('T')[0]
+
+    // Load appointments for the current month
+
     await appointmentStore.fetchAppointments({
-      date_from: startOfMonth.toISOString().split('T')[0],
-      date_to: endOfMonth.toISOString().split('T')[0]
+      date_from: dateFrom,
+      date_to: dateTo
     })
+
 
 
   } catch (error) {
@@ -233,10 +293,19 @@ const loadData = async () => {
 
 
 const getAppointmentsForDay = (date) => {
-  return appointmentStore.getAppointments.filter(appointment => {
-    const appointmentDate = new Date(appointment.start_time).toISOString().split('T')[0]
-    return appointmentDate === date
+  // Use a robust date comparison that handles timezone issues
+  const appointments = appointmentStore.getAppointments.filter(appointment => {
+    // Parse the appointment start time and extract just the date part
+    const appointmentDate = new Date(appointment.start_time)
+    const appointmentDateStr = appointmentDate.toISOString().split('T')[0]
+
+    // Also try parsing the raw string first to avoid timezone conversion issues
+    const rawDateStr = appointment.start_time.split('T')[0]
+
+    return appointmentDateStr === date || rawDateStr === date
   })
+
+  return appointments
 }
 
 

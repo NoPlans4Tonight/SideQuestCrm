@@ -397,6 +397,7 @@ const onUserChange = async () => {
 
 const onStartTimeChange = () => {
   if (form.value.start_time && form.value.assigned_to) {
+    // Extract date part from datetime-local input and update schedule date
     const [datePart] = form.value.start_time.split('T')
     scheduleDate.value = datePart
     if (selectedUserSchedule.value) {
@@ -539,14 +540,20 @@ watch(() => form.value.start_time, (newValue) => {
   }
 })
 
+// Watcher for assigned_to changes to sync schedule date with appointment date
 watch(() => form.value.assigned_to, (newValue) => {
-  if (newValue) {
+  if (newValue && form.value.start_time) {
     // Update schedule date to match appointment date when user changes
-    if (form.value.start_time) {
-      // Parse the datetime-local value and extract the date part
-      const [datePart] = form.value.start_time.split('T')
-      scheduleDate.value = datePart
-    }
+    const [datePart] = form.value.start_time.split('T')
+    scheduleDate.value = datePart
+    loadUserSchedule()
+  }
+})
+
+// Add watcher for scheduleDate changes to reload schedule
+watch(() => scheduleDate.value, () => {
+  if (form.value.assigned_to) {
+    loadUserSchedule()
   }
 })
 </script>
