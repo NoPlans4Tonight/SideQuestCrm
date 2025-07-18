@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use App\Services\CustomerService;
+use App\Services\CustomerListingService;
+use App\Services\CustomerDetailService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use App\Http\Resources\CustomerResource;
@@ -12,7 +14,9 @@ use App\Http\Resources\CustomerResource;
 class CustomerController extends Controller
 {
     public function __construct(
-        private CustomerService $customerService
+        private CustomerService $customerService,
+        private CustomerListingService $listingService,
+        private CustomerDetailService $detailService
     )
     {
     }
@@ -20,22 +24,12 @@ class CustomerController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = auth()->user();
-        $customers = $this->customerService->getCustomers($user->tenant_id, 15);
+        $result = $this->listingService->getCustomers($request, $user->tenant_id);
 
-        return response()->json([
-            'data' => CustomerResource::collection($customers->items()),
-            'meta' => [
-                'current_page' => $customers->currentPage(),
-                'last_page' => $customers->lastPage(),
-                'per_page' => $customers->perPage(),
-                'total' => $customers->total(),
-                'from' => $customers->firstItem(),
-                'to' => $customers->lastItem(),
-            ]
-        ]);
+        return response()->json($result);
     }
 
     /**
@@ -66,13 +60,16 @@ class CustomerController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($id)
+    public function show($id, Request $request)
     {
-        $customer = Customer::with('jobs')->find($id);
-        if (!$customer) {
+        $user = auth()->user();
+        $result = $this->detailService->getCustomer($id, $user->tenant_id, $request);
+
+        if (!$result) {
             return response()->json(['message' => 'Customer not found'], 404);
         }
-        return new CustomerResource($customer);
+
+        return response()->json($result);
     }
 
     /**
@@ -112,4 +109,21 @@ class CustomerController extends Controller
             'message' => 'Customer deleted successfully'
         ]);
     }
+
+    /**
+     * Get customer summary with related data
+     */
+    public function summary($id)
+    {
+        $user = auth()->user();
+        $result = $this->detailService->getCustomerSummary($id, $user->tenant_id);
+
+        if (!$result) {
+            return response()->json(['message' => 'Customer not found'], 404);
+        }
+
+        return response()->json($result);
+    }
+
+
 }

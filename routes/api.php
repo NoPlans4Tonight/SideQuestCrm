@@ -24,6 +24,7 @@ Route::middleware('auth:web')->group(function () {
         return response()->json(['user' => $request->user()]);
     });
     Route::get('/dashboard', [DashboardController::class, 'index']);
+    Route::get('/customers/{id}/summary', [CustomerController::class, 'summary']);
     Route::apiResource('customers', CustomerController::class);
     Route::apiResource('jobs', JobController::class);
     Route::apiResource('services', \App\Http\Controllers\Api\ServiceController::class);
