@@ -34,7 +34,15 @@ export const useCustomerStore = defineStore('customer', () => {
         params: { page, per_page: perPage }
       });
 
-      customers.value = response.data.data;
+      // Handle both enriched and non-enriched data structures
+      if (response.data.data && response.data.data.length > 0 && response.data.data[0].customer) {
+        // Enriched data structure - extract customer objects
+        customers.value = response.data.data.map(item => item.customer);
+      } else {
+        // Non-enriched data structure - use data directly
+        customers.value = response.data.data;
+      }
+
       pagination.value = response.data.meta;
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to fetch customers';
@@ -50,8 +58,17 @@ export const useCustomerStore = defineStore('customer', () => {
 
     try {
       const response = await axios.get(`/api/customers/${id}`);
-      currentCustomer.value = response.data.data;
-      return response.data.data;
+
+      // Handle both enriched and non-enriched data structures
+      if (response.data.data && response.data.data.customer) {
+        // Enriched data structure - extract customer object
+        currentCustomer.value = response.data.data.customer;
+        return response.data.data;
+      } else {
+        // Non-enriched data structure - use data directly
+        currentCustomer.value = response.data.data;
+        return response.data.data;
+      }
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to fetch customer';
       throw err;
@@ -158,6 +175,11 @@ export const useCustomerStore = defineStore('customer', () => {
     currentCustomer.value = null;
   };
 
+  // Helper method to get enriched customer data
+  const getEnrichedCustomerData = () => {
+    return currentCustomer.value;
+  };
+
   return {
     // State
     customers,
@@ -181,6 +203,7 @@ export const useCustomerStore = defineStore('customer', () => {
     deleteCustomer,
     searchCustomers,
     clearError,
-    clearCurrentCustomer
+    clearCurrentCustomer,
+    getEnrichedCustomerData
   };
 });
