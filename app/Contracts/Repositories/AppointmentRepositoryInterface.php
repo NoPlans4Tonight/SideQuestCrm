@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Collection;
 
 interface AppointmentRepositoryInterface
 {
-    public function getAppointments(int $tenantId, int $perPage = 15): LengthAwarePaginator;
+    public function getAppointments(int $tenantId, int $perPage = 15, array $filters = []): LengthAwarePaginator;
     public function getAppointmentById(int $id): ?Appointment;
     public function createAppointment(array $data): Appointment;
     public function updateAppointment(int $id, array $data): Appointment;
@@ -17,5 +17,5 @@ interface AppointmentRepositoryInterface
     public function getAppointmentsByDate(int $tenantId, string $date): Collection;
     public function getAppointmentsByUser(int $tenantId, int $userId, int $perPage = 15): LengthAwarePaginator;
     public function getAppointmentsByCustomer(int $tenantId, int $customerId, int $perPage = 15): LengthAwarePaginator;
-    public function checkAvailability(int $tenantId, string $startTime, string $endTime, ?int $excludeAppointmentId = null): bool;
+    public function checkAvailability(int $tenantId, string $startTime, string $endTime, ?int $excludeAppointmentId = null, ?int $assignedTo = null): bool;
 }
