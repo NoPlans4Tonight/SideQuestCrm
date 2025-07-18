@@ -41,6 +41,7 @@ class EstimateFactory extends Factory
             'notes' => $this->faker->optional()->paragraph(),
             'terms_conditions' => $this->faker->optional()->paragraphs(3, true),
             'assigned_to' => null,
+            'created_by' => User::factory(),
             'sent_at' => $this->faker->optional()->dateTimeBetween('-30 days', 'now'),
             'accepted_at' => $this->faker->optional()->dateTimeBetween('-30 days', 'now'),
             'rejected_at' => $this->faker->optional()->dateTimeBetween('-30 days', 'now'),

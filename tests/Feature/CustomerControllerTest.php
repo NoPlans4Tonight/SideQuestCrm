@@ -18,7 +18,7 @@ class CustomerControllerTest extends TestCase
             'tenant_id' => $this->tenant->id,
         ]);
 
-        $response = $this->getJson('/api/customers');
+        $response = $this->getJson('/api/customers?include_related=false');
 
         $response->assertStatus(200)
             ->assertJsonStructure([
@@ -170,22 +170,32 @@ class CustomerControllerTest extends TestCase
         $response->assertStatus(200)
             ->assertJsonStructure([
                 'data' => [
-                    'id',
-                    'first_name',
-                    'last_name',
-                    'email',
-                    'phone',
-                    'status',
-                    'created_at',
-                    'updated_at',
-                    'jobs',
+                    'customer' => [
+                        'id',
+                        'first_name',
+                        'last_name',
+                        'email',
+                        'phone',
+                        'status',
+                        'created_at',
+                        'updated_at',
+                    ],
+                    'related_data' => [
+                        'jobs',
+                        'appointments',
+                        'estimates',
+                        'services',
+                        'summary',
+                    ]
                 ]
             ])
             ->assertJson([
                 'data' => [
-                    'id' => $customer->id,
-                    'first_name' => $customer->first_name,
-                    'last_name' => $customer->last_name,
+                    'customer' => [
+                        'id' => $customer->id,
+                        'first_name' => $customer->first_name,
+                        'last_name' => $customer->last_name,
+                    ]
                 ]
             ]);
     }
