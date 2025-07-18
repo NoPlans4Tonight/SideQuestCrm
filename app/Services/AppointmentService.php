@@ -16,9 +16,9 @@ class AppointmentService implements AppointmentServiceInterface
         private AppointmentRepositoryInterface $appointmentRepository
     ) {}
 
-    public function getAppointments(int $tenantId, int $perPage = 15): LengthAwarePaginator
+    public function getAppointments(int $tenantId, int $perPage = 15, array $filters = []): LengthAwarePaginator
     {
-        return $this->appointmentRepository->getAppointments($tenantId, $perPage);
+        return $this->appointmentRepository->getAppointments($tenantId, $perPage, $filters);
     }
 
     public function getAppointmentById(int $id): ?Appointment
@@ -35,7 +35,8 @@ class AppointmentService implements AppointmentServiceInterface
 
         // Check availability if start_time and end_time are provided
         if (isset($data['start_time']) && isset($data['end_time'])) {
-            if (!$this->checkAvailability($tenantId, $data['start_time'], $data['end_time'])) {
+            $assignedTo = $data['assigned_to'] ?? null;
+            if (!$this->checkAvailability($tenantId, $data['start_time'], $data['end_time'], null, $assignedTo)) {
                 throw ValidationException::withMessages([
                     'time_slot' => 'The selected time slot conflicts with an existing appointment.'
                 ]);
@@ -58,7 +59,8 @@ class AppointmentService implements AppointmentServiceInterface
 
         // Check availability if time is being changed
         if (isset($data['start_time']) && isset($data['end_time'])) {
-            if (!$this->checkAvailability($appointment->tenant_id, $data['start_time'], $data['end_time'], $id)) {
+            $assignedTo = $data['assigned_to'] ?? $appointment->assigned_to;
+            if (!$this->checkAvailability($appointment->tenant_id, $data['start_time'], $data['end_time'], $id, $assignedTo)) {
                 throw ValidationException::withMessages([
                     'time_slot' => 'The selected time slot conflicts with an existing appointment.'
                 ]);
@@ -93,9 +95,9 @@ class AppointmentService implements AppointmentServiceInterface
         return $this->appointmentRepository->getAppointmentsByCustomer($tenantId, $customerId, $perPage);
     }
 
-    public function checkAvailability(int $tenantId, string $startTime, string $endTime, ?int $excludeAppointmentId = null): bool
+    public function checkAvailability(int $tenantId, string $startTime, string $endTime, ?int $excludeAppointmentId = null, ?int $assignedTo = null): bool
     {
-        return $this->appointmentRepository->checkAvailability($tenantId, $startTime, $endTime, $excludeAppointmentId);
+        return $this->appointmentRepository->checkAvailability($tenantId, $startTime, $endTime, $excludeAppointmentId, $assignedTo);
     }
 
     public function markAsConfirmed(int $id): Appointment
