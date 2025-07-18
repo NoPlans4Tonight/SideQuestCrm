@@ -17,35 +17,19 @@ class EstimateSeeder extends Seeder
      */
     public function run(): void
     {
-        // Get or create a tenant
-        $tenant = Tenant::firstOrCreate(
-            ['name' => 'Default Tenant'],
-            [
-                'domain' => 'default',
-                'database' => 'default',
-                'company_name' => 'SideQuest Handyman Services',
-                'contact_email' => 'info@sidequest.com',
-                'contact_phone' => '(555) 123-4567',
-                'address' => '123 Main Street',
-                'city' => 'Anytown',
-                'state' => 'CA',
-                'zip_code' => '90210',
-                'country' => 'US',
-                'timezone' => 'America/Los_Angeles',
-                'is_active' => true,
-            ]
-        );
+        // Get the existing tenant created by TestUserSeeder
+        $tenant = Tenant::where('name', 'rock-hard')->first();
+        if (!$tenant) {
+            $this->command->error('Tenant not found. Please run TestUserSeeder first.');
+            return;
+        }
 
-        // Get or create a user
-        $user = User::firstOrCreate(
-            ['email' => 'admin@sidequest.com'],
-            [
-                'tenant_id' => $tenant->id,
-                'name' => 'Admin User',
-                'password' => bcrypt('password'),
-                'email_verified_at' => now(),
-            ]
-        );
+        // Get the existing user created by TestUserSeeder
+        $user = User::where('email', 'admin@sidequest.com')->first();
+        if (!$user) {
+            $this->command->error('User not found. Please run TestUserSeeder first.');
+            return;
+        }
 
         // Get existing customers or create some
         $customers = Customer::where('tenant_id', $tenant->id)->get();
@@ -66,7 +50,7 @@ class EstimateSeeder extends Seeder
     private function createEstimates($tenant, $user, $customers, $services): void
     {
         // Create draft estimates
-        for ($i = 0; $i < 3; $i++) {
+        for ($i = 0; $i < 2; $i++) {
             $estimate = Estimate::factory()->create([
                 'tenant_id' => $tenant->id,
                 'customer_id' => $customers->random()->id,
@@ -74,11 +58,11 @@ class EstimateSeeder extends Seeder
                 'assigned_to' => $user->id,
             ]);
 
-            $this->createEstimateItems($estimate, $services, 2, 5);
+            $this->createEstimateItems($estimate, $services, 2, 4);
         }
 
         // Create pending estimates
-        for ($i = 0; $i < 2; $i++) {
+        for ($i = 0; $i < 1; $i++) {
             $estimate = Estimate::factory()->pending()->create([
                 'tenant_id' => $tenant->id,
                 'customer_id' => $customers->random()->id,
@@ -86,11 +70,11 @@ class EstimateSeeder extends Seeder
                 'assigned_to' => $user->id,
             ]);
 
-            $this->createEstimateItems($estimate, $services, 3, 6);
+            $this->createEstimateItems($estimate, $services, 2, 4);
         }
 
         // Create sent estimates
-        for ($i = 0; $i < 4; $i++) {
+        for ($i = 0; $i < 2; $i++) {
             $estimate = Estimate::factory()->sent()->create([
                 'tenant_id' => $tenant->id,
                 'customer_id' => $customers->random()->id,
@@ -102,7 +86,7 @@ class EstimateSeeder extends Seeder
         }
 
         // Create accepted estimates
-        for ($i = 0; $i < 2; $i++) {
+        for ($i = 0; $i < 1; $i++) {
             $estimate = Estimate::factory()->accepted()->create([
                 'tenant_id' => $tenant->id,
                 'customer_id' => $customers->random()->id,
@@ -110,11 +94,11 @@ class EstimateSeeder extends Seeder
                 'assigned_to' => $user->id,
             ]);
 
-            $this->createEstimateItems($estimate, $services, 4, 8);
+            $this->createEstimateItems($estimate, $services, 3, 5);
         }
 
         // Create rejected estimates
-        for ($i = 0; $i = 1; $i++) {
+        for ($i = 0; $i < 1; $i++) {
             $estimate = Estimate::factory()->rejected()->create([
                 'tenant_id' => $tenant->id,
                 'customer_id' => $customers->random()->id,
@@ -126,7 +110,7 @@ class EstimateSeeder extends Seeder
         }
 
         // Create expired estimates
-        for ($i = 0; $i = 1; $i++) {
+        for ($i = 0; $i < 1; $i++) {
             $estimate = Estimate::factory()->expired()->create([
                 'tenant_id' => $tenant->id,
                 'customer_id' => $customers->random()->id,
@@ -165,7 +149,7 @@ class EstimateSeeder extends Seeder
         }
 
         // Update estimate totals
-        $taxRate = rand(0, 15);
+        $taxRate = rand(0, 999) / 100; // 0.00 to 9.99
         $taxAmount = $subtotal * ($taxRate / 100);
         $discountAmount = rand(0, 100);
         $totalAmount = $subtotal + $taxAmount - $discountAmount;

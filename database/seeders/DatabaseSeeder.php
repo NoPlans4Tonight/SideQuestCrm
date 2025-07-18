@@ -15,8 +15,8 @@ class DatabaseSeeder extends Seeder
             TestUserSeeder::class,
             CustomerSeeder::class,
             ServiceSeeder::class,
-            AppointmentSeeder::class,
             EstimateSeeder::class,
+            AppointmentSeeder::class,
         ]);
     }
 }

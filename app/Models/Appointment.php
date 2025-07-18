@@ -17,6 +17,7 @@ class Appointment extends Model
         'customer_id',
         'lead_id',
         'estimate_id',
+        'service_id',
         'title',
         'description',
         'appointment_type',
@@ -24,12 +25,22 @@ class Appointment extends Model
         'end_time',
         'duration',
         'status',
+        'priority',
         'assigned_to',
         'created_by',
         'location',
         'notes',
         'reminder_sent',
         'reminder_sent_at',
+        'materials_cost',
+        'labor_cost',
+        'total_cost',
+        'price',
+        'estimated_hours',
+        'total_hours',
+        'started_at',
+        'completed_at',
+        'scheduled_date',
     ];
 
     protected $casts = [
@@ -38,6 +49,15 @@ class Appointment extends Model
         'duration' => 'integer',
         'reminder_sent' => 'boolean',
         'reminder_sent_at' => 'datetime',
+        'materials_cost' => 'decimal:2',
+        'labor_cost' => 'decimal:2',
+        'total_cost' => 'decimal:2',
+        'price' => 'decimal:2',
+        'estimated_hours' => 'decimal:2',
+        'total_hours' => 'decimal:2',
+        'started_at' => 'datetime',
+        'completed_at' => 'datetime',
+        'scheduled_date' => 'date',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -76,6 +96,11 @@ class Appointment extends Model
     public function estimate(): BelongsTo
     {
         return $this->belongsTo(Estimate::class);
+    }
+
+    public function service(): BelongsTo
+    {
+        return $this->belongsTo(Service::class);
     }
 
     public function assignedUser(): BelongsTo
@@ -151,6 +176,47 @@ class Appointment extends Model
             'reminder_sent_at' => now(),
         ]);
     }
+
+    // Job-specific methods
+    public function isInProgress(): bool
+    {
+        return $this->status === 'in_progress';
+    }
+
+    public function isOnHold(): bool
+    {
+        return $this->status === 'on_hold';
+    }
+
+    public function markAsStarted(): void
+    {
+        $this->update([
+            'status' => 'in_progress',
+            'started_at' => now(),
+        ]);
+    }
+
+    public function markAsOnHold(): void
+    {
+        $this->update(['status' => 'on_hold']);
+    }
+
+    public function hasDateTime(): bool
+    {
+        return !is_null($this->start_time) && !is_null($this->end_time);
+    }
+
+    public function isAllDay(): bool
+    {
+        return !is_null($this->scheduled_date) && is_null($this->start_time) && is_null($this->end_time);
+    }
+
+    public function getDurationHoursAttribute(): float
+    {
+        return $this->duration / 60;
+    }
+
+
 
     protected static function boot()
     {

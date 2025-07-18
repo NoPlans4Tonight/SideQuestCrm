@@ -26,15 +26,10 @@ class EstimateItemFactory extends Factory
      */
     public function definition(): array
     {
-        $estimate = Estimate::factory()->create();
-        $service = Service::factory()->create(['tenant_id' => $estimate->tenant_id]);
-
         $quantity = $this->faker->randomFloat(2, 1, 10);
         $unitPrice = $this->faker->randomFloat(2, 10, 500);
 
         return [
-            'estimate_id' => $estimate->id,
-            'service_id' => $this->faker->optional()->randomElement([null, $service->id]),
             'description' => $this->faker->sentence(3, 6),
             'quantity' => $quantity,
             'unit_price' => $unitPrice,

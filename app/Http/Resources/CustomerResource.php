@@ -41,19 +41,9 @@ class CustomerResource extends JsonResource
                     'email' => $this->createdBy->email,
                 ];
             }),
-            'jobs_count' => $this->whenCounted('jobs'),
             'estimates_count' => $this->whenCounted('estimates'),
             'appointments_count' => $this->whenCounted('appointments'),
             'leads_count' => $this->whenCounted('leads'),
-            'jobs' => $this->whenLoaded('jobs', function () {
-                return $this->jobs->map(function ($job) {
-                    return [
-                        'id' => $job->id,
-                        'title' => $job->title,
-                        'status' => $job->status,
-                    ];
-                });
-            }),
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
         ];

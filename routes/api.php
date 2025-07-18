@@ -4,7 +4,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\CustomerController;
-use App\Http\Controllers\Api\JobController;
 use App\Http\Controllers\Api\EstimateController;
 
 /*
@@ -19,14 +18,13 @@ use App\Http\Controllers\Api\EstimateController;
 */
 
 // Protected routes (authentication required)
-Route::middleware('auth:web')->group(function () {
+Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
         return response()->json(['user' => $request->user()]);
     });
     Route::get('/dashboard', [DashboardController::class, 'index']);
     Route::get('/customers/{id}/summary', [CustomerController::class, 'summary']);
     Route::apiResource('customers', CustomerController::class);
-    Route::apiResource('jobs', JobController::class);
     Route::apiResource('services', \App\Http\Controllers\Api\ServiceController::class);
 
     // Estimate routes (specific routes must come before resource route)
@@ -57,4 +55,5 @@ Route::middleware('auth:web')->group(function () {
 
     Route::apiResource('appointments', \App\Http\Controllers\Api\AppointmentController::class);
     Route::apiResource('users', \App\Http\Controllers\Api\UserController::class);
+    Route::get('/users/{userId}/schedule', [\App\Http\Controllers\Api\UserController::class, 'getSchedule']);
 });

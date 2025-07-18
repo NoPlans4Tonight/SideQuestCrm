@@ -157,7 +157,7 @@ class CustomerControllerTest extends TestCase
             ]);
     }
 
-    public function test_show_returns_customer_with_jobs(): void
+    public function test_show_returns_customer_with_related_data(): void
     {
         $this->authenticateUser();
 
@@ -181,7 +181,6 @@ class CustomerControllerTest extends TestCase
                         'updated_at',
                     ],
                     'related_data' => [
-                        'jobs',
                         'appointments',
                         'estimates',
                         'services',

@@ -4,185 +4,152 @@
     <div class="bg-white shadow">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center py-6">
-          <h1 class="text-3xl font-bold text-gray-900">Appointments</h1>
-          <button
-            @click="$router.push('/appointments/create')"
-            class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150"
-          >
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-            </svg>
-            New Appointment
-          </button>
+          <div>
+            <h1 class="text-3xl font-bold text-gray-900">Calendar</h1>
+            <p class="mt-1 text-sm text-gray-500">Schedule appointments and manage your work calendar</p>
+          </div>
+          <div class="flex space-x-3">
+            <button
+              @click="$router.push('/appointments/create')"
+              class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150"
+            >
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>
+              New Appointment
+            </button>
+
+          </div>
         </div>
       </div>
     </div>
 
     <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-      <!-- Filters -->
+      <!-- Calendar Controls -->
       <div class="bg-white shadow-sm rounded-lg mb-6">
         <div class="px-6 py-4 border-b border-gray-200">
-          <h3 class="text-lg font-medium text-gray-900">Filters</h3>
-        </div>
-        <div class="p-6">
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-              <select v-model="filters.status" @change="loadAppointments" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                <option value="">All Statuses</option>
-                <option value="scheduled">Scheduled</option>
-                <option value="confirmed">Confirmed</option>
-                <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled</option>
-                <option value="no_show">No Show</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Type</label>
-              <select v-model="filters.appointment_type" @change="loadAppointments" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                <option value="">All Types</option>
-                <option value="estimate">Estimate</option>
-                <option value="inspection">Inspection</option>
-                <option value="repair">Repair</option>
-                <option value="maintenance">Maintenance</option>
-                <option value="follow_up">Follow Up</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Date From</label>
-              <input
-                type="date"
-                v-model="filters.date_from"
-                @change="loadAppointments"
-                class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+              <button
+                @click="previousMonth"
+                class="p-2 text-gray-400 hover:text-gray-600"
               >
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Date To</label>
-              <input
-                type="date"
-                v-model="filters.date_to"
-                @change="loadAppointments"
-                class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+              </button>
+              <h2 class="text-xl font-semibold text-gray-900">{{ currentMonthYear }}</h2>
+              <button
+                @click="nextMonth"
+                class="p-2 text-gray-400 hover:text-gray-600"
               >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+              </button>
+            </div>
+            <div class="flex items-center space-x-4">
+              <button
+                @click="today"
+                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+              >
+                Today
+              </button>
+              <div class="flex items-center space-x-2">
+                <div class="flex items-center">
+                  <div class="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+                  <span class="text-sm text-gray-600">Appointments</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Appointments List -->
+      <!-- Calendar Grid -->
       <div class="bg-white shadow-sm rounded-lg">
-        <div class="px-6 py-4 border-b border-gray-200">
-          <h3 class="text-lg font-medium text-gray-900">All Appointments</h3>
-        </div>
-
-        <div v-if="appointmentStore.isLoading" class="p-6 text-center">
-          <div class="inline-flex items-center">
-            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Loading appointments...
+        <!-- Calendar Header -->
+        <div class="grid grid-cols-7 gap-px bg-gray-200 border-b border-gray-200">
+          <div v-for="day in weekDays" :key="day" class="bg-gray-50 px-3 py-2 text-center text-sm font-medium text-gray-500">
+            {{ day }}
           </div>
         </div>
 
-        <div v-else-if="appointmentStore.getAppointments.length === 0" class="p-6 text-center">
-          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-          </svg>
-          <h3 class="mt-2 text-sm font-medium text-gray-900">No appointments found</h3>
-          <p class="mt-1 text-sm text-gray-500">Get started by creating your first appointment.</p>
-          <div class="mt-6">
-            <button
-              @click="$router.push('/appointments/create')"
-              class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-            >
-              Create Appointment
-            </button>
-          </div>
-        </div>
-
-        <div v-else class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-              <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Appointment</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned To</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="appointment in appointmentStore.getAppointments" :key="appointment.id">
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-medium text-gray-900">{{ appointment.title }}</div>
-                  <div class="text-sm text-gray-500">{{ truncate(appointment.description, 50) }}</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div v-if="appointment.customer" class="text-sm text-gray-900">
-                    {{ appointment.customer.full_name || (appointment.customer.first_name + ' ' + appointment.customer.last_name) }}
-                  </div>
-                  <div v-else-if="appointment.lead" class="text-sm text-gray-900">
-                    {{ appointment.lead.full_name }} (Lead)
-                  </div>
-                  <div v-else class="text-sm text-gray-500">N/A</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">{{ formatDateTime(appointment.start_time) }}</div>
-                  <div v-if="appointment.duration" class="text-sm text-gray-500">{{ formatDuration(appointment.duration) }}</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                    {{ formatAppointmentType(appointment.appointment_type) }}
-                  </span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <span :class="getStatusClasses(appointment.status)" class="inline-flex px-2 py-1 text-xs font-semibold rounded-full">
-                    {{ formatStatus(appointment.status) }}
-                  </span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div v-if="appointment.assigned_user" class="text-sm text-gray-900">
-                    {{ appointment.assigned_user.name }}
-                  </div>
-                  <div v-else class="text-sm text-gray-500">Unassigned</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <div class="flex space-x-2">
-                    <button @click="$router.push(`/appointments/${appointment.id}`)" class="text-blue-600 hover:text-blue-900">View</button>
-                    <button @click="$router.push(`/appointments/${appointment.id}/edit`)" class="text-green-600 hover:text-green-900">Edit</button>
-                    <button @click="deleteAppointment(appointment.id)" class="text-red-600 hover:text-red-900">Delete</button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Pagination -->
-        <div v-if="appointmentStore.getPagination.last_page > 1" class="px-6 py-4 border-t border-gray-200">
-          <div class="flex items-center justify-between">
-            <div class="text-sm text-gray-700">
-              Showing {{ appointmentStore.getPagination.from }} to {{ appointmentStore.getPagination.to }} of {{ appointmentStore.getPagination.total }} results
-            </div>
-            <div class="flex space-x-2">
-              <button
-                @click="changePage(appointmentStore.getPagination.current_page - 1)"
-                :disabled="appointmentStore.getPagination.current_page === 1"
-                class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+        <!-- Calendar Body -->
+        <div class="grid grid-cols-7 gap-px bg-gray-200">
+          <div
+            v-for="day in calendarDays"
+            :key="day.date"
+            class="bg-white min-h-32 p-2"
+            :class="{
+              'bg-gray-50': !day.isCurrentMonth,
+              'bg-blue-50': day.isToday
+            }"
+          >
+            <div class="flex items-center justify-between mb-1">
+              <span
+                class="text-sm font-medium"
+                :class="{
+                  'text-gray-400': !day.isCurrentMonth,
+                  'text-blue-600': day.isToday,
+                  'text-gray-900': day.isCurrentMonth && !day.isToday
+                }"
               >
-                Previous
+                {{ day.dayNumber }}
+              </span>
+              <button
+                v-if="day.isCurrentMonth"
+                @click="openQuickAdd(day.date)"
+                class="text-gray-400 hover:text-gray-600 text-xs"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
               </button>
-              <button
-                @click="changePage(appointmentStore.getPagination.current_page + 1)"
-                :disabled="appointmentStore.getPagination.current_page === appointmentStore.getPagination.last_page"
-                class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            </div>
+
+            <!-- Events for this day -->
+            <div class="space-y-1">
+              <!-- Appointments -->
+              <div
+                v-for="appointment in getAppointmentsForDay(day.date)"
+                :key="`appointment-${appointment.id}`"
+                @click="viewAppointment(appointment.id)"
+                class="text-xs p-1 rounded cursor-pointer bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors"
               >
-                Next
+                <div class="font-medium truncate">{{ appointment.title }}</div>
+                <div class="text-blue-600">{{ formatTime(appointment.start_time) }}</div>
+              </div>
+
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Add Modal -->
+      <div v-if="showQuickAddModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+          <div class="mt-3">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Quick Add - {{ formatDate(selectedDate) }}</h3>
+            <div class="space-y-4">
+              <button
+                @click="quickAddAppointment"
+                class="w-full flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                Add Appointment
+              </button>
+
+            </div>
+            <div class="mt-4">
+              <button
+                @click="showQuickAddModal = false"
+                class="w-full px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+              >
+                Cancel
               </button>
             </div>
           </div>
@@ -193,97 +160,140 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAppointmentStore } from '@/stores/appointmentStore'
 
+const router = useRouter()
 const appointmentStore = useAppointmentStore()
 
-const filters = ref({
-  status: '',
-  appointment_type: '',
-  date_from: '',
-  date_to: ''
+// Calendar state
+const currentDate = ref(new Date())
+const showQuickAddModal = ref(false)
+const selectedDate = ref(null)
+
+// Calendar data
+const appointments = ref([])
+
+// Computed properties
+const currentMonthYear = computed(() => {
+  return currentDate.value.toLocaleDateString('en-US', {
+    month: 'long',
+    year: 'numeric'
+  })
 })
 
-onMounted(() => {
-  loadAppointments()
+const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+
+const calendarDays = computed(() => {
+  const year = currentDate.value.getFullYear()
+  const month = currentDate.value.getMonth()
+
+  const firstDay = new Date(year, month, 1)
+  const lastDay = new Date(year, month + 1, 0)
+  const startDate = new Date(firstDay)
+  startDate.setDate(startDate.getDate() - firstDay.getDay())
+
+  const days = []
+  const today = new Date()
+
+  for (let i = 0; i < 42; i++) {
+    const date = new Date(startDate)
+    date.setDate(startDate.getDate() + i)
+
+    days.push({
+      date: date.toISOString().split('T')[0],
+      dayNumber: date.getDate(),
+      isCurrentMonth: date.getMonth() === month,
+      isToday: date.toDateString() === today.toDateString()
+    })
+  }
+
+  return days
 })
 
-const loadAppointments = async () => {
-  const params = {
-    page: 1,
-    ...filters.value
-  }
-  await appointmentStore.fetchAppointments(params)
-}
+// Methods
+const loadData = async () => {
+  try {
+    // Load appointments for the current month
+    const startOfMonth = new Date(currentDate.value.getFullYear(), currentDate.value.getMonth(), 1)
+    const endOfMonth = new Date(currentDate.value.getFullYear(), currentDate.value.getMonth() + 1, 0)
 
-const changePage = async (page) => {
-  if (page < 1 || page > appointmentStore.getPagination.last_page) return
+    await appointmentStore.fetchAppointments({
+      date_from: startOfMonth.toISOString().split('T')[0],
+      date_to: endOfMonth.toISOString().split('T')[0]
+    })
 
-  const params = {
-    page,
-    ...filters.value
-  }
-  await appointmentStore.fetchAppointments(params)
-}
 
-const deleteAppointment = async (id) => {
-  if (confirm('Are you sure you want to delete this appointment?')) {
-    try {
-      await appointmentStore.deleteAppointment(id)
-      await loadAppointments()
-    } catch (error) {
-      console.error('Error deleting appointment:', error)
-    }
+  } catch (error) {
+    console.error('Error loading calendar data:', error)
   }
 }
 
-const formatDateTime = (dateTime) => {
-  if (!dateTime) return 'Not scheduled'
-  return new Date(dateTime).toLocaleString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
+
+
+const getAppointmentsForDay = (date) => {
+  return appointmentStore.getAppointments.filter(appointment => {
+    const appointmentDate = new Date(appointment.start_time).toISOString().split('T')[0]
+    return appointmentDate === date
+  })
+}
+
+
+
+const previousMonth = () => {
+  currentDate.value = new Date(currentDate.value.getFullYear(), currentDate.value.getMonth() - 1, 1)
+  loadData()
+}
+
+const nextMonth = () => {
+  currentDate.value = new Date(currentDate.value.getFullYear(), currentDate.value.getMonth() + 1, 1)
+  loadData()
+}
+
+const today = () => {
+  currentDate.value = new Date()
+  loadData()
+}
+
+const openQuickAdd = (date) => {
+  selectedDate.value = date
+  showQuickAddModal.value = true
+}
+
+const quickAddAppointment = () => {
+  showQuickAddModal.value = false
+  router.push(`/appointments/create?date=${selectedDate.value}`)
+}
+
+
+
+const viewAppointment = (id) => {
+  router.push(`/appointments/${id}`)
+}
+
+
+
+const formatTime = (dateTime) => {
+  if (!dateTime) return ''
+  return new Date(dateTime).toLocaleTimeString('en-US', {
     hour: 'numeric',
     minute: '2-digit',
     hour12: true
   })
 }
 
-const formatDuration = (minutes) => {
-  if (!minutes) return ''
-  if (minutes < 60) {
-    return `${minutes} min`
-  }
-  const hours = Math.floor(minutes / 60)
-  const remainingMinutes = minutes % 60
-  if (remainingMinutes === 0) {
-    return `${hours} hr${hours > 1 ? 's' : ''}`
-  }
-  return `${hours} hr${hours > 1 ? 's' : ''} ${remainingMinutes} min`
+const formatDate = (date) => {
+  if (!date) return ''
+  return new Date(date).toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
 }
 
-const formatAppointmentType = (type) => {
-  return type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())
-}
-
-const formatStatus = (status) => {
-  return status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())
-}
-
-const getStatusClasses = (status) => {
-  const classes = {
-    scheduled: 'bg-yellow-100 text-yellow-800',
-    confirmed: 'bg-blue-100 text-blue-800',
-    completed: 'bg-green-100 text-green-800',
-    cancelled: 'bg-red-100 text-red-800',
-    no_show: 'bg-gray-100 text-gray-800',
-  }
-  return classes[status] || 'bg-gray-100 text-gray-800'
-}
-
-const truncate = (text, length) => {
-  if (!text) return ''
-  return text.length > length ? text.substring(0, length) + '...' : text
-}
+onMounted(() => {
+  loadData()
+})
 </script>

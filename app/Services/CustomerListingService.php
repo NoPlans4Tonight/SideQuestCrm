@@ -56,24 +56,24 @@ class CustomerListingService
         $collection = $customers->getCollection();
 
         switch ($filter) {
-            case 'active_jobs':
-                $collection->load(['jobs' => function ($query) {
-                    $query->whereIn('status', ['scheduled', 'in_progress']);
+            case 'active_appointments':
+                $collection->load(['appointments' => function ($query) {
+                    $query->whereIn('status', ['scheduled', 'confirmed', 'in_progress']);
                 }]);
-                $filtered = $collection->filter(fn($customer) => $customer->jobs->isNotEmpty());
+                $filtered = $collection->filter(fn($customer) => $customer->appointments->isNotEmpty());
                 break;
 
             case 'pending_estimates':
                 $collection->load(['estimates' => function ($query) {
-                    $query->whereIn('status', ['draft', 'sent']);
+                    $query->whereIn('status', ['draft', 'sent', 'pending']);
                 }]);
                 $filtered = $collection->filter(fn($customer) => $customer->estimates->isNotEmpty());
                 break;
 
             case 'has_services':
-                $collection->load(['jobs.jobServices.service']);
+                $collection->load(['appointments.service']);
                 $filtered = $collection->filter(function ($customer) {
-                    return $customer->jobs->flatMap->jobServices->isNotEmpty();
+                    return $customer->appointments->whereNotNull('service_id')->isNotEmpty();
                 });
                 break;
 
@@ -97,8 +97,7 @@ class CustomerListingService
     private function loadRelationships(Collection $customers): void
     {
         $customers->load([
-            'jobs.jobServices.service',
-            'appointments',
+            'appointments.service',
             'estimates.estimateItems',
             'assignedUser',
             'createdBy'

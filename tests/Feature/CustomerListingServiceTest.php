@@ -4,10 +4,9 @@ namespace Tests\Feature;
 
 use Tests\TestCase;
 use App\Models\Customer;
-use App\Models\Job;
+use App\Models\Appointment;
 use App\Models\Estimate;
 use App\Models\Service;
-use App\Models\JobService as JobServiceModel;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -48,7 +47,6 @@ class CustomerListingServiceTest extends TestCase
                             'email'
                         ],
                         'related_data' => [
-                            'jobs',
                             'appointments',
                             'estimates',
                             'services',
@@ -60,7 +58,7 @@ class CustomerListingServiceTest extends TestCase
             ]);
     }
 
-    public function test_index_with_filter_active_jobs()
+    public function test_index_with_filter_active_appointments()
     {
         $customer1 = Customer::factory()->create([
             'tenant_id' => $this->tenant->id,
@@ -72,22 +70,24 @@ class CustomerListingServiceTest extends TestCase
             'created_by' => $this->user->id
         ]);
 
-        // Customer 1 has active job
-        Job::factory()->create([
+        // Customer 1 has active appointment
+        Appointment::factory()->create([
             'customer_id' => $customer1->id,
             'tenant_id' => $this->tenant->id,
-            'status' => 'in_progress'
+            'status' => 'confirmed',
+            'start_time' => now()->addDays(1)
         ]);
 
-        // Customer 2 has completed job (should not be included)
-        Job::factory()->create([
+        // Customer 2 has completed appointment (should not be included)
+        Appointment::factory()->create([
             'customer_id' => $customer2->id,
             'tenant_id' => $this->tenant->id,
-            'status' => 'completed'
+            'status' => 'completed',
+            'start_time' => now()->subDays(1)
         ]);
 
         $response = $this->actingAs($this->user)
-            ->getJson('/api/customers?filter=active_jobs');
+            ->getJson('/api/customers?filter=active_appointments');
 
         $response->assertStatus(200);
         $data = $response->json('data');
@@ -146,19 +146,15 @@ class CustomerListingServiceTest extends TestCase
             'tenant_id' => $this->tenant->id
         ]);
 
-        // Customer 1 has job with services
-        $job = Job::factory()->create([
+        // Customer 1 has appointment with services
+        Appointment::factory()->create([
             'customer_id' => $customer1->id,
-            'tenant_id' => $this->tenant->id
-        ]);
-
-        JobServiceModel::factory()->create([
-            'job_id' => $job->id,
+            'tenant_id' => $this->tenant->id,
             'service_id' => $service->id
         ]);
 
-        // Customer 2 has job without services
-        Job::factory()->create([
+        // Customer 2 has appointment without services
+        Appointment::factory()->create([
             'customer_id' => $customer2->id,
             'tenant_id' => $this->tenant->id
         ]);

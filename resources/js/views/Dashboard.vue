@@ -16,22 +16,22 @@
               New Customer
             </button>
             <button
-              @click="$router.push('/jobs/create')"
-              class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150"
+              @click="$router.push('/appointments/create')"
+              class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150"
             >
               <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
-              New Job
+              New Appointment
             </button>
             <button
-              @click="$router.push('/appointments/create')"
+              @click="$router.push('/appointments')"
               class="inline-flex items-center px-4 py-2 bg-purple-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition ease-in-out duration-150"
             >
               <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
               </svg>
-              New Appointment
+              View Calendar
             </button>
           </div>
         </div>
@@ -74,8 +74,8 @@
                 </svg>
               </div>
               <div class="ml-4">
-                <p class="text-sm font-medium text-gray-500">Active Jobs</p>
-                <p class="text-2xl font-semibold text-gray-900">{{ stats.activeJobs }}</p>
+                <p class="text-sm font-medium text-gray-500">Active Appointments</p>
+                <p class="text-2xl font-semibold text-gray-900">{{ stats.activeAppointments }}</p>
               </div>
             </div>
           </div>
@@ -171,17 +171,17 @@
               </button>
 
               <button
-                @click="$router.push('/jobs/create')"
+                @click="$router.push('/appointments/create')"
                 class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors w-full text-left"
               >
                 <div class="flex-shrink-0">
-                  <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                   </svg>
                 </div>
                 <div class="ml-4">
-                  <p class="text-sm font-medium text-gray-900">Create New Job</p>
-                  <p class="text-sm text-gray-500">Start a new work order</p>
+                  <p class="text-sm font-medium text-gray-900">Create New Appointment</p>
+                  <p class="text-sm text-gray-500">Schedule a new appointment or work order</p>
                 </div>
               </button>
 
@@ -201,32 +201,17 @@
               </button>
 
               <button
-                @click="$router.push('/jobs')"
+                @click="$router.push('/appointments')"
                 class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors w-full text-left"
               >
                 <div class="flex-shrink-0">
-                  <svg class="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
-                  </svg>
-                </div>
-                <div class="ml-4">
-                  <p class="text-sm font-medium text-gray-900">View All Jobs</p>
-                  <p class="text-sm text-gray-500">Manage work orders</p>
-                </div>
-              </button>
-
-              <button
-                @click="$router.push('/appointments/create')"
-                class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors w-full text-left"
-              >
-                <div class="flex-shrink-0">
-                  <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                   </svg>
                 </div>
                 <div class="ml-4">
-                  <p class="text-sm font-medium text-gray-900">Schedule Appointment</p>
-                  <p class="text-sm text-gray-500">Book a new appointment</p>
+                  <p class="text-sm font-medium text-gray-900">View All Appointments</p>
+                  <p class="text-sm text-gray-500">Manage appointments and track project execution</p>
                 </div>
               </button>
 
@@ -235,13 +220,28 @@
                 class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors w-full text-left"
               >
                 <div class="flex-shrink-0">
-                  <svg class="h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                   </svg>
                 </div>
                 <div class="ml-4">
-                  <p class="text-sm font-medium text-gray-900">View All Appointments</p>
-                  <p class="text-sm text-gray-500">Manage appointments</p>
+                  <p class="text-sm font-medium text-gray-900">View Calendar</p>
+                  <p class="text-sm text-gray-500">Schedule appointments and manage your work calendar</p>
+                </div>
+              </button>
+
+              <button
+                @click="$router.push('/appointments/create')"
+                class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors w-full text-left"
+              >
+                <div class="flex-shrink-0">
+                  <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                  </svg>
+                </div>
+                <div class="ml-4">
+                  <p class="text-sm font-medium text-gray-900">Schedule Appointment</p>
+                  <p class="text-sm text-gray-500">Book a meeting, estimate, or inspection</p>
                 </div>
               </button>
 
@@ -300,7 +300,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
               </svg>
               <h3 class="mt-2 text-sm font-medium text-gray-900">No recent activity</h3>
-              <p class="mt-1 text-sm text-gray-500">Get started by creating your first customer or job.</p>
+              <p class="mt-1 text-sm text-gray-500">Get started by creating your first customer or appointment.</p>
             </div>
           </div>
         </div>
@@ -376,69 +376,7 @@
         </div>
       </div>
 
-      <!-- Upcoming Jobs -->
-      <div class="mt-8 bg-white overflow-hidden shadow-sm rounded-lg">
-        <div class="px-6 py-4 border-b border-gray-200">
-          <h3 class="text-lg font-medium text-gray-900">Upcoming Jobs</h3>
-        </div>
-        <div class="p-6">
-          <div v-if="upcomingJobs.length > 0" class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-              <thead class="bg-gray-50">
-                <tr>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Job</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Scheduled</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody class="bg-white divide-y divide-gray-200">
-                <tr v-for="job in upcomingJobs" :key="job.id">
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm font-medium text-gray-900">{{ job.title }}</div>
-                    <div class="text-sm text-gray-500">{{ truncate(job.description, 50) }}</div>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-900">
-                      <span v-if="job.customer">
-                        {{ job.customer.full_name || (job.customer.first_name + ' ' + job.customer.last_name) }}
-                      </span>
-                      <span v-else>N/A</span>
-                    </div>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-900">{{ formatDate(job.scheduled_date) }}</div>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <span :class="getStatusClasses(job.status)" class="inline-flex px-2 py-1 text-xs font-semibold rounded-full">
-                      {{ formatStatus(job.status) }}
-                    </span>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button @click="$router.push(`/jobs/${job.id}`)" class="text-blue-600 hover:text-blue-900">View</button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div v-else class="text-center py-8">
-            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-            </svg>
-            <h3 class="mt-2 text-sm font-medium text-gray-900">No upcoming jobs</h3>
-            <p class="mt-1 text-sm text-gray-500">Create your first job to get started.</p>
-            <div class="mt-6">
-              <button
-                @click="$router.push('/jobs/create')"
-                class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-              >
-                Create Job
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+
     </div>
   </div>
 </template>
@@ -450,11 +388,10 @@ import { useAuthStore } from '@/stores/authStore'
 const authStore = useAuthStore()
 const stats = ref({
   totalCustomers: 0,
-  activeJobs: 0,
+  activeAppointments: 0,
   completedThisMonth: 0,
   revenueThisMonth: 0
 })
-const upcomingJobs = ref([])
 const upcomingAppointments = ref([])
 const recentActivity = ref([])
 
@@ -477,7 +414,6 @@ const loadDashboardData = async () => {
     if (response.ok) {
       const data = await response.json()
       stats.value = data.stats
-      upcomingJobs.value = data.upcomingJobs
       upcomingAppointments.value = data.upcomingAppointments
       recentActivity.value = data.recentActivity
     }
