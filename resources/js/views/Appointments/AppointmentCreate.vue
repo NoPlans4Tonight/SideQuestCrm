@@ -89,6 +89,7 @@
                 id="start_time"
                 v-model="form.start_time"
                 type="datetime-local"
+                @change="onStartTimeChange"
                 required
                 class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
               >
@@ -142,6 +143,7 @@
             <select
               id="assigned_to"
               v-model="form.assigned_to"
+              @change="onUserChange"
               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">Select user (optional)</option>
@@ -149,6 +151,78 @@
                 {{ user.name }}
               </option>
             </select>
+
+            <!-- User Schedule Preview -->
+            <div v-if="selectedUserSchedule && form.assigned_to" class="mt-4 p-4 bg-gray-50 rounded-lg">
+              <div class="flex items-center justify-between mb-3">
+                <h4 class="text-sm font-medium text-gray-900">
+                  {{ selectedUserSchedule.user.name }}'s Schedule
+                </h4>
+                <button
+                  @click="refreshUserSchedule"
+                  class="text-blue-600 hover:text-blue-800 text-sm"
+                >
+                  Refresh
+                </button>
+              </div>
+
+              <!-- Date Navigation -->
+              <div class="flex items-center space-x-2 mb-3">
+                <button
+                  type="button"
+                  @click="previousScheduleDate"
+                  class="p-1 text-gray-400 hover:text-gray-600"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                  </svg>
+                </button>
+                <span class="text-sm font-medium text-gray-700">
+                  {{ formatScheduleDate(scheduleDate) }}
+                </span>
+                <button
+                  type="button"
+                  @click="nextScheduleDate"
+                  class="p-1 text-gray-400 hover:text-gray-600"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Schedule Items -->
+              <div class="space-y-2">
+                <div v-if="selectedUserSchedule.appointments.length === 0" class="text-sm text-gray-500">
+                  No scheduled items for this date
+                </div>
+
+                <!-- Appointments -->
+                <div v-for="appointment in selectedUserSchedule.appointments" :key="`appointment-${appointment.id}`" class="flex items-center p-2 bg-blue-100 rounded">
+                  <div class="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
+                  <div class="flex-1">
+                    <div class="text-sm font-medium text-blue-900">{{ appointment.title }}</div>
+                    <div class="text-xs text-blue-700">
+                      {{ formatTime(appointment.start_time) }} - {{ formatTime(appointment.end_time) }}
+                      <span v-if="appointment.customer"> • {{ appointment.customer.name }}</span>
+                    </div>
+                  </div>
+                  <span class="text-xs text-blue-600 px-2 py-1 bg-blue-200 rounded">{{ appointment.status }}</span>
+                </div>
+
+
+              </div>
+
+              <!-- Conflict Warning -->
+              <div v-if="hasScheduleConflict" class="mt-3 p-2 bg-yellow-50 border border-yellow-200 rounded">
+                <div class="flex items-center">
+                  <svg class="w-4 h-4 text-yellow-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  <span class="text-sm text-yellow-800">Potential schedule conflict detected</span>
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- Location -->
@@ -220,7 +294,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAppointmentStore } from '@/stores/appointmentStore'
 import { useCustomerStore } from '@/stores/customerStore'
@@ -231,6 +305,9 @@ const customerStore = useCustomerStore()
 
 const customers = ref([])
 const users = ref([])
+const selectedUserSchedule = ref(null)
+const scheduleDate = ref(new Date().toLocaleDateString('en-CA')) // YYYY-MM-DD format
+const hasScheduleConflict = ref(false)
 
 const form = ref({
   title: '',
@@ -287,14 +364,144 @@ const setDefaultDateTime = () => {
   tomorrow.setDate(tomorrow.getDate() + 1)
   tomorrow.setHours(9, 0, 0, 0) // 9 AM tomorrow
 
-  form.value.start_time = tomorrow.toISOString().slice(0, 16)
+  // Format datetime-local input in local timezone
+  const formatLocalDateTime = (date) => {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    const hours = String(date.getHours()).padStart(2, '0')
+    const minutes = String(date.getMinutes()).padStart(2, '0')
+    return `${year}-${month}-${day}T${hours}:${minutes}`
+  }
+
+  form.value.start_time = formatLocalDateTime(tomorrow)
 
   const endTime = new Date(tomorrow)
   endTime.setHours(10, 0, 0, 0) // 10 AM tomorrow
-  form.value.end_time = endTime.toISOString().slice(0, 16)
+  form.value.end_time = formatLocalDateTime(endTime)
 
   form.value.duration = '60' // 1 hour default
+
+  // Set schedule date to match the appointment date using local date formatting
+  scheduleDate.value = tomorrow.toLocaleDateString('en-CA') // YYYY-MM-DD format
 }
+
+const onUserChange = async () => {
+  if (form.value.assigned_to) {
+    await loadUserSchedule()
+  } else {
+    selectedUserSchedule.value = null
+    hasScheduleConflict.value = false
+  }
+}
+
+const onStartTimeChange = () => {
+  if (form.value.start_time && form.value.assigned_to) {
+    const [datePart] = form.value.start_time.split('T')
+    scheduleDate.value = datePart
+    if (selectedUserSchedule.value) {
+      loadUserSchedule()
+    }
+  }
+}
+
+const loadUserSchedule = async () => {
+  if (!form.value.assigned_to) return
+
+  try {
+    const token = localStorage.getItem('auth_token')
+    const response = await fetch(`/api/users/${form.value.assigned_to}/schedule?date=${scheduleDate.value}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    })
+
+    if (response.ok) {
+      const data = await response.json()
+      selectedUserSchedule.value = data
+      checkForConflicts()
+    }
+  } catch (error) {
+    console.error('Error loading user schedule:', error)
+  }
+}
+
+const refreshUserSchedule = async () => {
+  await loadUserSchedule()
+}
+
+const previousScheduleDate = () => {
+  // Parse the date string manually to avoid timezone issues
+  const [year, month, day] = scheduleDate.value.split('-').map(Number)
+  const date = new Date(year, month - 1, day - 1) // month is 0-indexed, subtract 1 day
+  scheduleDate.value = date.toLocaleDateString('en-CA') // YYYY-MM-DD format
+  loadUserSchedule()
+}
+
+const nextScheduleDate = () => {
+  // Parse the date string manually to avoid timezone issues
+  const [year, month, day] = scheduleDate.value.split('-').map(Number)
+  const date = new Date(year, month - 1, day + 1) // month is 0-indexed, add 1 day
+  scheduleDate.value = date.toLocaleDateString('en-CA') // YYYY-MM-DD format
+  loadUserSchedule()
+}
+
+const checkForConflicts = () => {
+  if (!selectedUserSchedule.value || !form.value.start_time || !form.value.end_time) {
+    hasScheduleConflict.value = false
+    return
+  }
+
+  const appointmentStart = new Date(form.value.start_time)
+  const appointmentEnd = new Date(form.value.end_time)
+  const appointmentDate = appointmentStart.toLocaleDateString('en-CA') // YYYY-MM-DD format
+
+  // Only check conflicts for the same date
+  if (appointmentDate !== scheduleDate.value) {
+    hasScheduleConflict.value = false
+    return
+  }
+
+  // Check for conflicts with appointments
+  const hasAppointmentConflict = selectedUserSchedule.value.appointments.some(appointment => {
+    const existingStart = new Date(appointment.start_time)
+    const existingEnd = new Date(appointment.end_time)
+
+    return (
+      (appointmentStart < existingEnd && appointmentEnd > existingStart) ||
+      (existingStart < appointmentEnd && existingEnd > appointmentStart)
+    )
+  })
+
+  hasScheduleConflict.value = hasAppointmentConflict
+}
+
+const formatTime = (dateTime) => {
+  if (!dateTime) return ''
+  return new Date(dateTime).toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  })
+}
+
+const formatScheduleDate = (date) => {
+  if (!date) return ''
+
+  // Parse the date string manually to avoid timezone issues
+  const [year, month, day] = date.split('-').map(Number)
+  const dateObj = new Date(year, month - 1, day) // month is 0-indexed
+
+  return dateObj.toLocaleDateString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric'
+  })
+}
+
+
 
 const createAppointment = async () => {
   try {
@@ -313,4 +520,33 @@ const createAppointment = async () => {
     console.error('Error creating appointment:', error)
   }
 }
+
+// Watchers for automatic conflict detection
+watch([() => form.value.start_time, () => form.value.end_time], () => {
+  if (selectedUserSchedule.value) {
+    checkForConflicts()
+  }
+})
+
+// Watcher for start_time changes to update schedule date
+watch(() => form.value.start_time, (newValue) => {
+  if (newValue && form.value.assigned_to) {
+    const [datePart] = newValue.split('T')
+    scheduleDate.value = datePart
+    if (selectedUserSchedule.value) {
+      loadUserSchedule()
+    }
+  }
+})
+
+watch(() => form.value.assigned_to, (newValue) => {
+  if (newValue) {
+    // Update schedule date to match appointment date when user changes
+    if (form.value.start_time) {
+      // Parse the datetime-local value and extract the date part
+      const [datePart] = form.value.start_time.split('T')
+      scheduleDate.value = datePart
+    }
+  }
+})
 </script>

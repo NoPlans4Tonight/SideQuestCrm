@@ -25,6 +25,7 @@ class AppointmentFactory extends Factory
             'customer_id' => Customer::factory(),
             'lead_id' => null,
             'estimate_id' => null,
+            'service_id' => null,
             'title' => $this->faker->sentence(3),
             'description' => $this->faker->paragraph(),
             'appointment_type' => $this->faker->randomElement(['estimate', 'inspection', 'repair', 'maintenance', 'follow_up', 'other']),

@@ -2,53 +2,61 @@
 
 namespace Tests\Feature;
 
-use App\Models\Customer;
-use App\Models\Job;
-use Carbon\Carbon;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use App\Models\Customer;
+use App\Models\Appointment;
+use App\Models\Estimate;
+use App\Models\Tenant;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Carbon\Carbon;
 
 class DashboardControllerTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected Tenant $tenant;
+    protected User $user;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->tenant = Tenant::factory()->create(['domain' => 'test-dashboard-' . uniqid()]);
+        $this->user = User::factory()->create(['tenant_id' => $this->tenant->id]);
+    }
+
     public function test_index_returns_dashboard_data(): void
     {
         $this->authenticateUser();
-
-        // Create test data
-        Customer::factory()->count(5)->create([
-            'tenant_id' => $this->tenant->id,
-        ]);
 
         $customer = Customer::factory()->create([
             'tenant_id' => $this->tenant->id,
         ]);
 
-        // Create jobs with different statuses
-        Job::factory()->count(3)->create([
+        // Create appointments with different statuses
+        Appointment::factory()->count(3)->create([
             'customer_id' => $customer->id,
             'tenant_id' => $this->tenant->id,
-            'status' => 'scheduled',
-            'scheduled_date' => Carbon::tomorrow(), // These are the upcoming jobs
+            'status' => 'confirmed',
+            'start_time' => Carbon::tomorrow(), // These are the upcoming appointments
         ]);
 
-        Job::factory()->count(2)->create([
+        Appointment::factory()->count(2)->create([
             'customer_id' => $customer->id,
             'tenant_id' => $this->tenant->id,
             'status' => 'in_progress',
-            'scheduled_date' => null, // Ensure these don't appear in upcoming jobs
+            'start_time' => Carbon::now()->addDays(2), // Ensure these appear in upcoming appointments
         ]);
 
-        // Create completed jobs for this month
-        Job::factory()->count(4)->create([
+        // Create completed appointments for this month
+        Appointment::factory()->count(4)->create([
             'customer_id' => $customer->id,
             'tenant_id' => $this->tenant->id,
             'status' => 'completed',
             'completed_at' => Carbon::now(),
             'total_cost' => 1000.00,
         ]);
-
-        // Remove the separate "upcoming jobs" creation since they're the same as the scheduled jobs above
 
         $response = $this->getJson('/api/dashboard');
 
@@ -60,15 +68,15 @@ class DashboardControllerTest extends TestCase
                 ],
                 'stats' => [
                     'totalCustomers',
-                    'activeJobs',
+                    'activeAppointments',
                     'completedThisMonth',
                     'revenueThisMonth',
                 ],
-                'upcomingJobs' => [
+                'upcomingAppointments' => [
                     '*' => [
                         'id',
                         'title',
-                        'scheduled_date',
+                        'start_time',
                         'status',
                         'customer' => [
                             'id',
@@ -87,13 +95,13 @@ class DashboardControllerTest extends TestCase
         $this->assertEquals($this->user->email, $responseData['user']['email']);
 
         // Assert statistics
-        $this->assertEquals(6, $responseData['stats']['totalCustomers']); // 5 + 1 customer
-        $this->assertEquals(5, $responseData['stats']['activeJobs']); // 3 scheduled + 2 in_progress
+        $this->assertEquals(1, $responseData['stats']['totalCustomers']); // 1 customer
+        $this->assertEquals(5, $responseData['stats']['activeAppointments']); // 3 confirmed + 2 in_progress
         $this->assertEquals(4, $responseData['stats']['completedThisMonth']);
         $this->assertEquals(4000.00, $responseData['stats']['revenueThisMonth']); // 4 * 1000.00
 
-        // Assert upcoming jobs
-        $this->assertCount(3, $responseData['upcomingJobs']);
+        // Assert upcoming appointments
+        $this->assertCount(5, $responseData['upcomingAppointments']);
     }
 
     public function test_index_returns_zero_stats_when_no_data(): void
@@ -110,16 +118,16 @@ class DashboardControllerTest extends TestCase
                 ],
                 'stats' => [
                     'totalCustomers' => 0,
-                    'activeJobs' => 0,
+                    'activeAppointments' => 0,
                     'completedThisMonth' => 0,
                     'revenueThisMonth' => 0,
                 ],
-                'upcomingJobs' => [],
+                'upcomingAppointments' => [],
                 'recentActivity' => [],
             ]);
     }
 
-    public function test_index_excludes_completed_and_cancelled_jobs_from_upcoming(): void
+    public function test_index_excludes_completed_and_cancelled_appointments_from_upcoming(): void
     {
         $this->authenticateUser();
 
@@ -127,40 +135,40 @@ class DashboardControllerTest extends TestCase
             'tenant_id' => $this->tenant->id,
         ]);
 
-        // Create completed job scheduled for tomorrow (should be excluded)
-        Job::factory()->create([
+        // Create completed appointment scheduled for tomorrow (should be excluded)
+        Appointment::factory()->create([
             'customer_id' => $customer->id,
             'tenant_id' => $this->tenant->id,
             'status' => 'completed',
-            'scheduled_date' => Carbon::tomorrow(),
+            'start_time' => Carbon::tomorrow(),
         ]);
 
-        // Create cancelled job scheduled for tomorrow (should be excluded)
-        Job::factory()->create([
+        // Create cancelled appointment scheduled for tomorrow (should be excluded)
+        Appointment::factory()->create([
             'customer_id' => $customer->id,
             'tenant_id' => $this->tenant->id,
             'status' => 'cancelled',
-            'scheduled_date' => Carbon::tomorrow(),
+            'start_time' => Carbon::tomorrow(),
         ]);
 
-        // Create scheduled job scheduled for tomorrow (should be included)
-        Job::factory()->create([
+        // Create confirmed appointment scheduled for tomorrow (should be included)
+        Appointment::factory()->create([
             'customer_id' => $customer->id,
             'tenant_id' => $this->tenant->id,
-            'status' => 'scheduled',
-            'scheduled_date' => Carbon::tomorrow(),
+            'status' => 'confirmed',
+            'start_time' => Carbon::tomorrow(),
         ]);
 
         $response = $this->getJson('/api/dashboard');
 
         $response->assertStatus(200);
 
-        $upcomingJobs = $response->json('upcomingJobs');
-        $this->assertCount(1, $upcomingJobs);
-        $this->assertEquals('scheduled', $upcomingJobs[0]['status']);
+        $upcomingAppointments = $response->json('upcomingAppointments');
+        $this->assertCount(1, $upcomingAppointments);
+        $this->assertEquals('confirmed', $upcomingAppointments[0]['status']);
     }
 
-    public function test_index_only_counts_jobs_from_current_month_for_completed_stats(): void
+    public function test_index_only_counts_appointments_from_current_month_for_completed_stats(): void
     {
         $this->authenticateUser();
 
@@ -168,8 +176,8 @@ class DashboardControllerTest extends TestCase
             'tenant_id' => $this->tenant->id,
         ]);
 
-        // Create completed job from last month
-        Job::factory()->create([
+        // Create completed appointment from last month
+        Appointment::factory()->create([
             'customer_id' => $customer->id,
             'tenant_id' => $this->tenant->id,
             'status' => 'completed',
@@ -177,8 +185,8 @@ class DashboardControllerTest extends TestCase
             'total_cost' => 500.00,
         ]);
 
-        // Create completed job from this month
-        Job::factory()->create([
+        // Create completed appointment from this month
+        Appointment::factory()->create([
             'customer_id' => $customer->id,
             'tenant_id' => $this->tenant->id,
             'status' => 'completed',
@@ -195,7 +203,7 @@ class DashboardControllerTest extends TestCase
         $this->assertEquals(1000.00, $stats['revenueThisMonth']);
     }
 
-    public function test_index_limits_upcoming_jobs_to_five(): void
+    public function test_index_limits_upcoming_appointments_to_five(): void
     {
         $this->authenticateUser();
 
@@ -203,23 +211,23 @@ class DashboardControllerTest extends TestCase
             'tenant_id' => $this->tenant->id,
         ]);
 
-        // Create 7 upcoming jobs
-        Job::factory()->count(7)->create([
+        // Create 7 upcoming appointments
+        Appointment::factory()->count(7)->create([
             'customer_id' => $customer->id,
             'tenant_id' => $this->tenant->id,
-            'status' => 'scheduled',
-            'scheduled_date' => Carbon::tomorrow(),
+            'status' => 'confirmed',
+            'start_time' => Carbon::tomorrow(),
         ]);
 
         $response = $this->getJson('/api/dashboard');
 
         $response->assertStatus(200);
 
-        $upcomingJobs = $response->json('upcomingJobs');
-        $this->assertCount(5, $upcomingJobs); // Should be limited to 5
+        $upcomingAppointments = $response->json('upcomingAppointments');
+        $this->assertCount(5, $upcomingAppointments); // Should be limited to 5
     }
 
-    public function test_index_orders_upcoming_jobs_by_scheduled_date(): void
+    public function test_index_orders_upcoming_appointments_by_start_time(): void
     {
         $this->authenticateUser();
 
@@ -227,48 +235,47 @@ class DashboardControllerTest extends TestCase
             'tenant_id' => $this->tenant->id,
         ]);
 
-        // Create jobs with different scheduled dates
-        $job3 = Job::factory()->create([
+        // Create appointments with different start times
+        $appointment3 = Appointment::factory()->create([
             'customer_id' => $customer->id,
             'tenant_id' => $this->tenant->id,
-            'status' => 'scheduled',
-            'scheduled_date' => Carbon::now()->addDays(3),
+            'status' => 'confirmed',
+            'start_time' => Carbon::now()->addDays(3),
         ]);
 
-        $job1 = Job::factory()->create([
+        $appointment1 = Appointment::factory()->create([
             'customer_id' => $customer->id,
             'tenant_id' => $this->tenant->id,
-            'status' => 'scheduled',
-            'scheduled_date' => Carbon::now()->addDay(),
+            'status' => 'confirmed',
+            'start_time' => Carbon::now()->addDays(1),
         ]);
 
-        $job2 = Job::factory()->create([
+        $appointment2 = Appointment::factory()->create([
             'customer_id' => $customer->id,
             'tenant_id' => $this->tenant->id,
-            'status' => 'scheduled',
-            'scheduled_date' => Carbon::now()->addDays(2),
+            'status' => 'confirmed',
+            'start_time' => Carbon::now()->addDays(2),
         ]);
 
         $response = $this->getJson('/api/dashboard');
 
         $response->assertStatus(200);
 
-        $upcomingJobs = $response->json('upcomingJobs');
-        $this->assertCount(3, $upcomingJobs);
+        $upcomingAppointments = $response->json('upcomingAppointments');
+        $this->assertCount(3, $upcomingAppointments);
 
-        // Should be ordered by scheduled_date ascending
-        $this->assertEquals($job1->id, $upcomingJobs[0]['id']);
-        $this->assertEquals($job2->id, $upcomingJobs[1]['id']);
-        $this->assertEquals($job3->id, $upcomingJobs[2]['id']);
+        // Should be ordered by start_time ascending
+        $this->assertEquals($appointment1->id, $upcomingAppointments[0]['id']);
+        $this->assertEquals($appointment2->id, $upcomingAppointments[1]['id']);
+        $this->assertEquals($appointment3->id, $upcomingAppointments[2]['id']);
     }
 
     public function test_index_handles_database_errors_gracefully(): void
     {
         $this->authenticateUser();
 
-        // Mock a database error by temporarily dropping the jobs table
-        // This will cause an error when the controller tries to query jobs
-        \DB::statement('DROP TABLE IF EXISTS crm_jobs');
+        // Mock a database error by dropping the appointments table
+        \Schema::dropIfExists('appointments');
 
         $response = $this->getJson('/api/dashboard');
 
@@ -280,9 +287,6 @@ class DashboardControllerTest extends TestCase
             ->assertJson([
                 'error' => 'Dashboard data could not be loaded',
             ]);
-
-        // Don't try to restore the table - let the test framework handle it
-        // The RefreshDatabase trait will handle the cleanup
     }
 
     public function test_unauthenticated_request_is_rejected(): void
@@ -291,4 +295,6 @@ class DashboardControllerTest extends TestCase
 
         $response->assertStatus(401);
     }
+
+
 }

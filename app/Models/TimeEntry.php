@@ -11,7 +11,7 @@ class TimeEntry extends Model
     use HasFactory;
 
     protected $fillable = [
-        'job_id',
+        'appointment_id',
         'user_id',
         'start_time',
         'end_time',
@@ -34,9 +34,9 @@ class TimeEntry extends Model
         'updated_at' => 'datetime',
     ];
 
-    public function job(): BelongsTo
+    public function appointment(): BelongsTo
     {
-        return $this->belongsTo(Job::class);
+        return $this->belongsTo(Appointment::class);
     }
 
     public function user(): BelongsTo

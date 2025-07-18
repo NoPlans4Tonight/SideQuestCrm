@@ -34,7 +34,7 @@ class EstimateFactory extends Factory
             'status' => $this->faker->randomElement(['draft', 'pending', 'sent', 'accepted', 'rejected', 'expired']),
             'valid_until' => $this->faker->optional()->dateTimeBetween('now', '+30 days'),
             'subtotal' => $this->faker->randomFloat(2, 100, 5000),
-            'tax_rate' => $this->faker->randomFloat(2, 0, 15),
+            'tax_rate' => $this->faker->randomFloat(4, 0, 9.9999),
             'tax_amount' => 0, // Will be calculated
             'discount_amount' => $this->faker->randomFloat(2, 0, 500),
             'total_amount' => 0, // Will be calculated

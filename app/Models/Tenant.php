@@ -48,10 +48,7 @@ class Tenant extends BaseTenant
         return $this->hasMany(Lead::class);
     }
 
-    public function jobs(): HasMany
-    {
-        return $this->hasMany(Job::class);
-    }
+
 
     public function estimates(): HasMany
     {

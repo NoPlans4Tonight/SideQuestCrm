@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
-use App\Models\Job;
 use App\Models\Appointment;
 use App\Models\Estimate;
 use Illuminate\Http\Request;
@@ -21,29 +20,30 @@ class DashboardController extends Controller
 
             // Get statistics for the dashboard with error handling
             $totalCustomers = 0;
-            $activeJobs = 0;
+            $activeAppointments = 0;
             $completedThisMonth = 0;
             $revenueThisMonth = 0;
             $pendingEstimates = 0;
             $sentEstimates = 0;
-            $upcomingJobs = collect();
+            $upcomingAppointments = collect();
             $recentActivity = collect();
 
             // Query customers
             $totalCustomers = Customer::where('tenant_id', $user->tenant_id)->count();
 
-            // Query jobs
-            $activeJobs = Job::where('tenant_id', $user->tenant_id)
+            // Query appointments
+            $activeAppointments = Appointment::where('tenant_id', $user->tenant_id)
                 ->where('status', '!=', 'completed')
+                ->where('status', '!=', 'cancelled')
                 ->count();
-            $completedThisMonth = Job::where('tenant_id', $user->tenant_id)
+            $completedThisMonth = Appointment::where('tenant_id', $user->tenant_id)
                 ->where('status', 'completed')
                 ->whereMonth('completed_at', Carbon::now()->month)
                 ->whereYear('completed_at', Carbon::now()->year)
                 ->count();
 
-            // Calculate revenue for this month (using total_cost field)
-            $revenueThisMonth = Job::where('tenant_id', $user->tenant_id)
+            // Calculate revenue for this month (using total_cost field from appointments)
+            $revenueThisMonth = Appointment::where('tenant_id', $user->tenant_id)
                 ->where('status', 'completed')
                 ->whereMonth('completed_at', Carbon::now()->month)
                 ->whereYear('completed_at', Carbon::now()->year)
@@ -57,20 +57,11 @@ class DashboardController extends Controller
                 ->where('status', 'sent')
                 ->count();
 
-            // Get upcoming jobs (scheduled for today or future)
-            $upcomingJobs = Job::where('tenant_id', $user->tenant_id)
-                ->where('scheduled_date', '>=', Carbon::today())
-                ->where('status', '!=', 'completed')
-                ->where('status', '!=', 'cancelled')
-                ->with(['customer', 'assignedUser'])
-                ->orderBy('scheduled_date')
-                ->limit(5)
-                ->get();
-
-            // Get upcoming appointments
+            // Get upcoming appointments (scheduled for today or future)
             $upcomingAppointments = Appointment::where('tenant_id', $user->tenant_id)
                 ->where('start_time', '>=', Carbon::now())
                 ->where('status', '!=', 'cancelled')
+                ->where('status', '!=', 'completed')
                 ->with(['customer', 'assignedUser'])
                 ->orderBy('start_time')
                 ->limit(5)
@@ -90,13 +81,12 @@ class DashboardController extends Controller
                 ],
                 'stats' => [
                     'totalCustomers' => $totalCustomers,
-                    'activeJobs' => $activeJobs,
+                    'activeAppointments' => $activeAppointments,
                     'completedThisMonth' => $completedThisMonth,
                     'revenueThisMonth' => $revenueThisMonth,
                     'pendingEstimates' => $pendingEstimates,
                     'sentEstimates' => $sentEstimates
                 ],
-                'upcomingJobs' => $upcomingJobs,
                 'upcomingAppointments' => $upcomingAppointments,
                 'recentEstimates' => $recentEstimates,
                 'recentActivity' => $recentActivity

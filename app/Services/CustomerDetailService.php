@@ -17,8 +17,7 @@ class CustomerDetailService
     public function getCustomer(int $customerId, int $tenantId, Request $request): ?array
     {
         $customer = Customer::with([
-            'jobs.jobServices.service',
-            'appointments',
+            'appointments.service',
             'estimates.estimateItems',
             'assignedUser',
             'createdBy'
@@ -47,8 +46,7 @@ class CustomerDetailService
     public function getCustomerSummary(int $customerId, int $tenantId): ?array
     {
         $customer = Customer::with([
-            'jobs.jobServices.service',
-            'appointments',
+            'appointments.service',
             'estimates.estimateItems',
             'assignedUser',
             'createdBy'
@@ -61,11 +59,7 @@ class CustomerDetailService
         $enrichedData = $this->enrichmentService->enrichCustomerData($customer);
 
         return [
-            'data' => [
-                'customer' => $customer,
-                'summary' => $enrichedData['related_data']['summary'],
-                'related_data' => $enrichedData['related_data']
-            ]
+            'data' => $enrichedData['related_data']['summary']
         ];
     }
 }

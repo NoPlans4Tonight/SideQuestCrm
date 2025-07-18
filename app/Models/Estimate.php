@@ -99,10 +99,7 @@ class Estimate extends Model
         return $this->hasMany(EstimateItem::class);
     }
 
-    public function jobs(): HasMany
-    {
-        return $this->hasMany(Job::class);
-    }
+
 
     public function followUps(): HasMany
     {

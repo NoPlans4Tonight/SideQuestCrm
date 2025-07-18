@@ -66,10 +66,7 @@ class Customer extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function jobs(): HasMany
-    {
-        return $this->hasMany(Job::class);
-    }
+
 
     public function estimates(): HasMany
     {

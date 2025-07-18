@@ -124,17 +124,7 @@
         <!-- Related Data -->
         <div v-if="customerData && customerData.related_data" class="mt-8">
           <h3 class="text-lg font-medium text-gray-900 mb-4">Related Information</h3>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Jobs -->
-            <div class="bg-gray-50 rounded-lg p-4">
-              <h4 class="text-sm font-medium text-gray-900 mb-2">Jobs</h4>
-              <div v-if="customerData.related_data.jobs.has_jobs" class="space-y-2">
-                <p class="text-sm text-gray-600">Total: {{ customerData.related_data.jobs.total_count }}</p>
-                <p class="text-sm text-gray-600">Value: ${{ customerData.related_data.jobs.total_value }}</p>
-              </div>
-              <p v-else class="text-sm text-gray-500">No jobs found</p>
-            </div>
-
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- Estimates -->
             <div class="bg-gray-50 rounded-lg p-4">
               <h4 class="text-sm font-medium text-gray-900 mb-2">Estimates</h4>

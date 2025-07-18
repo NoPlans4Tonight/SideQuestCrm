@@ -17,8 +17,6 @@ use App\Services\EstimateService;
 use Illuminate\Support\ServiceProvider;
 use App\Models\Service;
 use App\Observers\ServiceObserver;
-use App\Models\Job;
-use App\Observers\JobObserver;
 use App\Models\Appointment;
 use App\Observers\AppointmentObserver;
 use App\Models\Estimate;
@@ -42,8 +40,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(EstimateServiceInterface::class, EstimateService::class);
         $this->app->bind(\App\Contracts\Repositories\ServiceRepositoryInterface::class, \App\Repositories\ServiceRepository::class);
         $this->app->bind(\App\Contracts\Services\ServiceServiceInterface::class, \App\Services\ServiceService::class);
-        $this->app->bind(\App\Contracts\Repositories\JobRepositoryInterface::class, \App\Repositories\JobRepository::class);
-        $this->app->bind(\App\Contracts\Services\JobServiceInterface::class, \App\Services\JobService::class);
     }
 
     /**
@@ -52,7 +48,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Service::observe(ServiceObserver::class);
-        Job::observe(JobObserver::class);
         Appointment::observe(AppointmentObserver::class);
         Estimate::observe(EstimateObserver::class);
     }

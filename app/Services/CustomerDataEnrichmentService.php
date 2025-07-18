@@ -8,7 +8,6 @@ use Illuminate\Support\Collection;
 class CustomerDataEnrichmentService
 {
     public function __construct(
-        private JobService $jobService,
         private AppointmentService $appointmentService,
         private EstimateService $estimateService,
         private ServiceService $serviceService
@@ -22,7 +21,6 @@ class CustomerDataEnrichmentService
         return [
             'customer' => $customer,
             'related_data' => [
-                'jobs' => $this->getCustomerJobs($customer),
                 'appointments' => $this->getCustomerAppointments($customer),
                 'estimates' => $this->getCustomerEstimates($customer),
                 'services' => $this->getCustomerServices($customer),
@@ -31,44 +29,7 @@ class CustomerDataEnrichmentService
         ];
     }
 
-        /**
-     * Get customer jobs with status breakdown
-     */
-    private function getCustomerJobs(Customer $customer): array
-    {
-        $jobs = $customer->jobs()->with(['jobServices.service'])->get();
 
-        if ($jobs->isEmpty()) {
-            return [
-                'has_jobs' => false,
-                'total_count' => 0,
-                'jobs' => [],
-                'status_breakdown' => [],
-                'total_value' => 0,
-            ];
-        }
-
-        $statusBreakdown = $jobs->groupBy('status')->map->count();
-        $totalValue = $jobs->sum('total_cost');
-
-        return [
-            'has_jobs' => true,
-            'total_count' => $jobs->count(),
-            'jobs' => $jobs->map(function ($job) {
-                return [
-                    'id' => $job->id,
-                    'title' => $job->title,
-                    'status' => $job->status,
-                    'total_amount' => $job->total_cost,
-                    'start_date' => $job->scheduled_date?->toISOString(),
-                    'completion_date' => $job->completed_at?->toISOString(),
-                    'services_count' => $job->jobServices->count(),
-                ];
-            }),
-            'status_breakdown' => $statusBreakdown,
-            'total_value' => $totalValue,
-        ];
-    }
 
     /**
      * Get customer appointments with status breakdown
@@ -151,18 +112,13 @@ class CustomerDataEnrichmentService
     }
 
     /**
-     * Get services associated with customer through jobs
+     * Get services associated with customer through appointments
      */
     private function getCustomerServices(Customer $customer): array
     {
-        $jobServices = $customer->jobs()
-            ->with(['jobServices.service'])
-            ->get()
-            ->flatMap(function ($job) {
-                return $job->jobServices;
-            });
+        $appointments = $customer->appointments()->with('service')->get();
 
-        if ($jobServices->isEmpty()) {
+        if ($appointments->isEmpty()) {
             return [
                 'has_services' => false,
                 'total_count' => 0,
@@ -171,29 +127,31 @@ class CustomerDataEnrichmentService
             ];
         }
 
-        $uniqueServices = $jobServices->map(function ($jobService) {
-            return $jobService->service;
+        $services = $appointments->whereNotNull('service_id')->map(function ($appointment) {
+            return [
+                'id' => $appointment->id,
+                'service_name' => $appointment->service->name ?? 'No Service',
+                'quantity' => 1,
+                'unit_price' => $appointment->service->base_price ?? 0,
+                'total_price' => $appointment->service->base_price ?? 0,
+                'appointment_id' => $appointment->id,
+            ];
+        });
+
+        $uniqueServices = $appointments->whereNotNull('service_id')->map(function ($appointment) {
+            return $appointment->service;
         })->unique('id');
 
         return [
             'has_services' => true,
-            'total_count' => $jobServices->count(),
-            'services' => $jobServices->map(function ($jobService) {
-                return [
-                    'id' => $jobService->id,
-                    'service_name' => $jobService->service->name,
-                    'quantity' => $jobService->quantity,
-                    'unit_price' => $jobService->unit_price,
-                    'total_price' => $jobService->total_price,
-                    'job_id' => $jobService->job_id,
-                ];
-            }),
+            'total_count' => $services->count(),
+            'services' => $services,
             'unique_services' => $uniqueServices->map(function ($service) {
                 return [
                     'id' => $service->id,
                     'name' => $service->name,
                     'description' => $service->description,
-                    'price' => $service->price,
+                    'price' => $service->base_price,
                 ];
             }),
         ];
@@ -204,20 +162,17 @@ class CustomerDataEnrichmentService
      */
     private function getCustomerSummary(Customer $customer): array
     {
-        $jobs = $customer->jobs;
         $appointments = $customer->appointments;
         $estimates = $customer->estimates;
 
         return [
-            'total_jobs' => $jobs->count(),
-            'active_jobs' => $jobs->whereIn('status', ['scheduled', 'in_progress'])->count(),
-            'completed_jobs' => $jobs->where('status', 'completed')->count(),
             'total_appointments' => $appointments->count(),
             'upcoming_appointments' => $appointments->where('start_time', '>', now())->count(),
+            'completed_appointments' => $appointments->where('status', 'completed')->count(),
             'total_estimates' => $estimates->count(),
             'pending_estimates' => $estimates->whereIn('status', ['draft', 'sent'])->count(),
             'accepted_estimates' => $estimates->where('status', 'accepted')->count(),
-            'total_job_value' => $jobs->sum('total_cost'),
+            'total_appointment_value' => $appointments->sum('total_cost'),
             'total_estimate_value' => $estimates->sum('total_amount'),
             'pending_estimate_value' => $estimates->whereIn('status', ['draft', 'sent'])->sum('total_amount'),
             'last_activity' => $this->getLastActivity($customer),
@@ -232,7 +187,6 @@ class CustomerDataEnrichmentService
     {
         $dates = collect([
             $customer->updated_at,
-            $customer->jobs->max('updated_at'),
             $customer->appointments->max('updated_at'),
             $customer->estimates->max('updated_at'),
         ])->filter();
