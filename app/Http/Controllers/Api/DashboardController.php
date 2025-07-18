@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use App\Models\Job;
+use App\Models\Appointment;
+use App\Models\Estimate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
@@ -22,6 +24,8 @@ class DashboardController extends Controller
             $activeJobs = 0;
             $completedThisMonth = 0;
             $revenueThisMonth = 0;
+            $pendingEstimates = 0;
+            $sentEstimates = 0;
             $upcomingJobs = collect();
             $recentActivity = collect();
 
@@ -45,6 +49,14 @@ class DashboardController extends Controller
                 ->whereYear('completed_at', Carbon::now()->year)
                 ->sum('total_cost') ?? 0;
 
+            // Query estimates
+            $pendingEstimates = Estimate::where('tenant_id', $user->tenant_id)
+                ->where('status', 'pending')
+                ->count();
+            $sentEstimates = Estimate::where('tenant_id', $user->tenant_id)
+                ->where('status', 'sent')
+                ->count();
+
             // Get upcoming jobs (scheduled for today or future)
             $upcomingJobs = Job::where('tenant_id', $user->tenant_id)
                 ->where('scheduled_date', '>=', Carbon::today())
@@ -52,6 +64,22 @@ class DashboardController extends Controller
                 ->where('status', '!=', 'cancelled')
                 ->with(['customer', 'assignedUser'])
                 ->orderBy('scheduled_date')
+                ->limit(5)
+                ->get();
+
+            // Get upcoming appointments
+            $upcomingAppointments = Appointment::where('tenant_id', $user->tenant_id)
+                ->where('start_time', '>=', Carbon::now())
+                ->where('status', '!=', 'cancelled')
+                ->with(['customer', 'assignedUser'])
+                ->orderBy('start_time')
+                ->limit(5)
+                ->get();
+
+            // Get recent estimates
+            $recentEstimates = Estimate::where('tenant_id', $user->tenant_id)
+                ->with(['customer', 'assignedUser'])
+                ->orderBy('created_at', 'desc')
                 ->limit(5)
                 ->get();
 
@@ -64,9 +92,13 @@ class DashboardController extends Controller
                     'totalCustomers' => $totalCustomers,
                     'activeJobs' => $activeJobs,
                     'completedThisMonth' => $completedThisMonth,
-                    'revenueThisMonth' => $revenueThisMonth
+                    'revenueThisMonth' => $revenueThisMonth,
+                    'pendingEstimates' => $pendingEstimates,
+                    'sentEstimates' => $sentEstimates
                 ],
                 'upcomingJobs' => $upcomingJobs,
+                'upcomingAppointments' => $upcomingAppointments,
+                'recentEstimates' => $recentEstimates,
                 'recentActivity' => $recentActivity
             ]);
         } catch (\Exception $e) {
