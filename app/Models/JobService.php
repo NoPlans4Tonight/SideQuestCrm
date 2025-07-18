@@ -46,11 +46,11 @@ class JobService extends Model
 
     public function getTotalPriceAttribute($value): float
     {
-        if ($this->hours_worked && $this->service && $this->service->hourly_rate) {
-            return $this->hours_worked * $this->service->hourly_rate;
+        if ($this->hours_worked > 0 && $this->service && $this->service->hourly_rate > 0) {
+            return (float)$this->hours_worked * (float)$this->service->hourly_rate;
         }
 
-        return $this->quantity * $this->unit_price;
+        return (float)$this->quantity * (float)$this->unit_price;
     }
 
     public function isCompleted(): bool
