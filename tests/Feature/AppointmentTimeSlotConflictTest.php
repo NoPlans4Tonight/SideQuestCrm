@@ -101,9 +101,9 @@ class AppointmentTimeSlotConflictTest extends TestCase
 
     public function test_time_slot_conflict_with_overlapping_times()
     {
-        // Create an appointment for user1 from 1:00 PM to 3:00 PM
-        $startTime1 = now()->setTime(13, 0, 0);
-        $endTime1 = now()->setTime(15, 0, 0);
+        // Create an appointment for user1 from 1:00 PM to 3:00 PM tomorrow
+        $startTime1 = now()->addDay()->setTime(13, 0, 0);
+        $endTime1 = now()->addDay()->setTime(15, 0, 0);
 
         $existingAppointment = Appointment::factory()->create([
             'tenant_id' => $this->tenant->id,
@@ -113,9 +113,9 @@ class AppointmentTimeSlotConflictTest extends TestCase
             'status' => 'scheduled'
         ]);
 
-        // Try to create an appointment for user1 from 2:00 PM to 4:00 PM (overlapping)
-        $startTime2 = now()->setTime(14, 0, 0);
-        $endTime2 = now()->setTime(16, 0, 0);
+        // Try to create an appointment for user1 from 2:00 PM to 4:00 PM tomorrow (overlapping)
+        $startTime2 = now()->addDay()->setTime(14, 0, 0);
+        $endTime2 = now()->addDay()->setTime(16, 0, 0);
 
         $appointmentData = [
             'title' => 'Overlapping Appointment',
@@ -137,9 +137,9 @@ class AppointmentTimeSlotConflictTest extends TestCase
 
     public function test_time_slot_conflict_ignores_cancelled_appointments()
     {
-        // Create a cancelled appointment for user1 at a specific time
-        $startTime = now()->addHour();
-        $endTime = now()->addHours(2);
+        // Create a cancelled appointment for user1 at a specific time tomorrow
+        $startTime = now()->addDay()->addHour();
+        $endTime = now()->addDay()->addHours(2);
 
         $cancelledAppointment = Appointment::factory()->create([
             'tenant_id' => $this->tenant->id,
