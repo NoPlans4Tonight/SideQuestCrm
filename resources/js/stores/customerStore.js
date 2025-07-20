@@ -85,7 +85,20 @@ export const useCustomerStore = defineStore('customer', () => {
       const response = await axios.post('/api/customers', customerData);
       const newCustomer = response.data.data;
 
+      // Add to the beginning of the list and update pagination
       customers.value.unshift(newCustomer);
+
+      // Update pagination to reflect the new customer
+      if (pagination.value.total !== undefined) {
+        pagination.value.total += 1;
+        pagination.value.to = Math.min((pagination.value.to || 0) + 1, pagination.value.per_page);
+
+        // If we're at the per_page limit, remove the last item to maintain page size
+        if (customers.value.length > pagination.value.per_page) {
+          customers.value.pop();
+        }
+      }
+
       return newCustomer;
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to create customer';
@@ -109,8 +122,6 @@ export const useCustomerStore = defineStore('customer', () => {
       if (index !== -1) {
         // Use Vue 3 reactive replacement to ensure reactivity
         customers.value.splice(index, 1, updatedCustomer);
-      } else {
-        console.log('Customer not found in store list for update, current customers');
       }
 
       // Update current customer if it's the same
@@ -134,11 +145,12 @@ export const useCustomerStore = defineStore('customer', () => {
     try {
       await axios.delete(`/api/customers/${id}`);
 
-      // Remove from customers array
-      customers.value = customers.value.filter(c => c.id !== id);
+      // Remove from customers array - ensure proper ID comparison
+      const customerId = parseInt(id);
+      customers.value = customers.value.filter(c => parseInt(c.id) !== customerId);
 
       // Clear current customer if it's the same
-      if (currentCustomer.value?.id === id) {
+      if (currentCustomer.value?.id && parseInt(currentCustomer.value.id) === customerId) {
         currentCustomer.value = null;
       }
     } catch (err) {

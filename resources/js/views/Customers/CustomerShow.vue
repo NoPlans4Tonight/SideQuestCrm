@@ -168,10 +168,11 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useCustomerStore } from '@/stores/customerStore';
 
 const route = useRoute();
+const router = useRouter();
 const customerStore = useCustomerStore();
 const customerData = ref(null);
 
@@ -191,6 +192,17 @@ onMounted(async () => {
     customerData.value = data;
   } catch (error) {
     console.error('Failed to fetch customer:', error);
+    // Handle 404 errors (customer not found/deleted)
+    if (error.response?.status === 404) {
+      // Redirect to customer list with error message
+      router.push({
+        path: '/customers',
+        query: {
+          message: 'Customer not found or has been deleted',
+          type: 'error'
+        }
+      });
+    }
   }
 });
 </script>
