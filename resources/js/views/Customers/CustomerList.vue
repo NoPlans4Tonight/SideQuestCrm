@@ -375,7 +375,14 @@ const checkForNotifications = () => {
 };
 
 onMounted(() => {
-  customerStore.fetchCustomers();
+  // Only fetch customers if we don't have data or we're not returning from create/edit
+  const fromCreateOrEdit = route.query.message &&
+    (route.query.message.includes('created') || route.query.message.includes('updated'));
+
+  if (!customerStore.getCustomers.length || !fromCreateOrEdit) {
+    customerStore.fetchCustomers();
+  }
+
   checkForNotifications();
 });
 
@@ -384,7 +391,7 @@ watch(() => route.query, () => {
   checkForNotifications();
 }, { deep: true });
 
-// Watch for route path changes to refresh data when returning from edit
+// Watch for route path changes to refresh data when returning from edit/create
 watch(() => route.path, (newPath, oldPath) => {
   // If returning to customer list from edit/create, refresh data
   if (newPath === '/customers' && oldPath && (oldPath.includes('/edit') || oldPath.includes('/create'))) {
