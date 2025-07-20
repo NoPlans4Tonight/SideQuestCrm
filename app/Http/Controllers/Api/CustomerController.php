@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Services\CustomerListingOrchestratorService;
 use App\Services\CustomerCrudOrchestratorService;
 use App\Services\CustomerDetailService;
+use App\Http\Requests\Customer\StoreCustomerRequest;
+use App\Http\Requests\Customer\UpdateCustomerRequest;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -31,7 +33,7 @@ class CustomerController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreCustomerRequest $request)
     {
         try {
             $user = auth()->user();
@@ -64,10 +66,11 @@ class CustomerController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(UpdateCustomerRequest $request, $id)
     {
         try {
-            $result = $this->crudOrchestrator->updateCustomer($id, $request);
+            $user = auth()->user();
+            $result = $this->crudOrchestrator->updateCustomer($id, $request, $user->tenant_id);
 
             return response()->json($result);
         } catch (ValidationException $e) {
@@ -83,7 +86,8 @@ class CustomerController extends Controller
      */
     public function destroy($id)
     {
-        $result = $this->crudOrchestrator->deleteCustomer($id);
+        $user = auth()->user();
+        $result = $this->crudOrchestrator->deleteCustomer($id, $user->tenant_id);
 
         return response()->json($result);
     }

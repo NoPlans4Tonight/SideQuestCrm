@@ -22,9 +22,9 @@ class StoreCustomerRequest extends FormRequest
             'city' => 'nullable|string|max:255',
             'state' => 'nullable|string|max:255',
             'zip_code' => 'nullable|string|max:20',
-            'country' => 'nullable|string|max:255|default:US',
+            'country' => 'nullable|string|max:255',
             'notes' => 'nullable|string',
-            'status' => 'nullable|in:active,inactive,prospect|default:active',
+            'status' => 'nullable|in:active,inactive,prospect',
             'source' => 'nullable|string|max:255',
             'assigned_to' => 'nullable|exists:users,id',
         ];

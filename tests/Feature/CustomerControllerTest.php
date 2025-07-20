@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Customer;
+use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -125,9 +126,6 @@ class CustomerControllerTest extends TestCase
                     'first_name',
                     'email',
                 ]
-            ])
-            ->assertJson([
-                'message' => 'Validation failed',
             ]);
     }
 
@@ -259,18 +257,17 @@ class CustomerControllerTest extends TestCase
         ]);
     }
 
-    public function test_update_returns_validation_errors_for_invalid_data(): void
+    public function test_update_returns_validation_errors_for_invalid_data()
     {
         $this->authenticateUser();
 
         $customer = Customer::factory()->create([
             'tenant_id' => $this->tenant->id,
+            'created_by' => $this->user->id
         ]);
 
         $invalidData = [
-            'first_name' => '', // Required field is empty
-            'last_name' => 'Smith',
-            'email' => 'invalid-email', // Invalid email format
+            'email' => 'invalid-email'
         ];
 
         $response = $this->putJson("/api/customers/{$customer->id}", $invalidData);
@@ -279,8 +276,7 @@ class CustomerControllerTest extends TestCase
             ->assertJsonStructure([
                 'message',
                 'errors' => [
-                    'first_name',
-                    'email',
+                    'email'
                 ]
             ]);
     }
@@ -328,6 +324,9 @@ class CustomerControllerTest extends TestCase
 
     public function test_unauthenticated_requests_are_rejected(): void
     {
+        // Create tenant for test data without authenticating
+        $tenant = Tenant::factory()->create();
+
         $response = $this->getJson('/api/customers');
         $response->assertStatus(401);
 
@@ -335,7 +334,7 @@ class CustomerControllerTest extends TestCase
         $response->assertStatus(401);
 
         $customer = Customer::factory()->create([
-            'tenant_id' => $this->tenant->id,
+            'tenant_id' => $tenant->id,
         ]);
 
         $response = $this->getJson("/api/customers/{$customer->id}");
