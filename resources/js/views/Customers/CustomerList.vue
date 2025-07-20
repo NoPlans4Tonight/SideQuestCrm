@@ -384,8 +384,16 @@ watch(() => route.query, () => {
   checkForNotifications();
 }, { deep: true });
 
-// Watch for route changes to refresh data
+// Watch for route path changes to refresh data when returning from edit
+watch(() => route.path, (newPath, oldPath) => {
+  // If returning to customer list from edit/create, refresh data
+  if (newPath === '/customers' && oldPath && (oldPath.includes('/edit') || oldPath.includes('/create'))) {
+    customerStore.refreshCustomers();
+  }
+});
+
+// Watch for customers data changes
 watch(() => customerStore.getCustomers, () => {
-  // Data updated
+  // Data updated - component will automatically re-render
 }, { deep: true });
 </script>
