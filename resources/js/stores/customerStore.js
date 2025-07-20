@@ -103,14 +103,18 @@ export const useCustomerStore = defineStore('customer', () => {
       const response = await axios.put(`/api/customers/${id}`, customerData);
       const updatedCustomer = response.data.data;
 
-      // Update in customers array
-      const index = customers.value.findIndex(c => c.id === id);
+      // Update in customers array - ensure proper ID comparison
+      const customerId = parseInt(id);
+      const index = customers.value.findIndex(c => parseInt(c.id) === customerId);
       if (index !== -1) {
-        customers.value[index] = updatedCustomer;
+        // Use Vue 3 reactive replacement to ensure reactivity
+        customers.value.splice(index, 1, updatedCustomer);
+      } else {
+        console.log('Customer not found in store list for update, current customers');
       }
 
       // Update current customer if it's the same
-      if (currentCustomer.value?.id === id) {
+      if (currentCustomer.value?.id && parseInt(currentCustomer.value.id) === customerId) {
         currentCustomer.value = updatedCustomer;
       }
 
@@ -147,7 +151,9 @@ export const useCustomerStore = defineStore('customer', () => {
 
   const searchCustomers = async (query) => {
     if (!query.trim()) {
-      return [];
+      // Reset to full list when search is cleared
+      await fetchCustomers();
+      return customers.value;
     }
 
     loading.value = true;
@@ -157,6 +163,19 @@ export const useCustomerStore = defineStore('customer', () => {
       const response = await axios.get('/api/customers/search', {
         params: { q: query }
       });
+
+      // Update customers array with search results
+      customers.value = response.data.data;
+
+      // Reset pagination for search results
+      pagination.value = {
+        current_page: 1,
+        last_page: 1,
+        per_page: response.data.data.length,
+        total: response.data.data.length,
+        from: response.data.data.length > 0 ? 1 : null,
+        to: response.data.data.length
+      };
 
       return response.data.data;
     } catch (err) {
@@ -173,6 +192,12 @@ export const useCustomerStore = defineStore('customer', () => {
 
   const clearCurrentCustomer = () => {
     currentCustomer.value = null;
+  };
+
+  // Force refresh customer data (useful after updates)
+  const refreshCustomers = async (page = null) => {
+    const currentPage = page || pagination.value.current_page;
+    await fetchCustomers(currentPage);
   };
 
   // Helper method to get enriched customer data
@@ -202,6 +227,7 @@ export const useCustomerStore = defineStore('customer', () => {
     updateCustomer,
     deleteCustomer,
     searchCustomers,
+    refreshCustomers,
     clearError,
     clearCurrentCustomer,
     getEnrichedCustomerData
