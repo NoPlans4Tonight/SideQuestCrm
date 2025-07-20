@@ -11,19 +11,19 @@ abstract class TestCase extends BaseTestCase
     protected User $user;
     protected Tenant $tenant;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        // Create a tenant and user for testing
-        $this->tenant = Tenant::factory()->create();
-        $this->user = User::factory()->create([
-            'tenant_id' => $this->tenant->id,
-        ]);
-    }
-
     protected function authenticateUser(): User
     {
+        // Create a tenant and user for testing if they don't exist
+        if (!isset($this->tenant)) {
+            $this->tenant = Tenant::factory()->create();
+        }
+
+        if (!isset($this->user)) {
+            $this->user = User::factory()->create([
+                'tenant_id' => $this->tenant->id,
+            ]);
+        }
+
         $this->actingAs($this->user);
         return $this->user;
     }

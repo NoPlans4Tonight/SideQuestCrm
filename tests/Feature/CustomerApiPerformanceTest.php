@@ -18,6 +18,10 @@ class CustomerApiPerformanceTest extends TestCase
     {
         parent::setUp();
 
+        // Initialize tenant and user for tests
+        $this->tenant = Tenant::factory()->create();
+        $this->user = User::factory()->create(['tenant_id' => $this->tenant->id]);
+
         // Create test data
         $customers = Customer::factory()->count(10)->create([
             'tenant_id' => $this->tenant->id,
