@@ -6,6 +6,8 @@ use App\Contracts\Repositories\CustomerRepositoryInterface;
 use App\Contracts\Services\CustomerServiceInterface;
 use App\Repositories\CustomerRepository;
 use App\Services\CustomerService;
+use App\Services\CustomerListingOrchestratorService;
+use App\Services\CustomerCrudOrchestratorService;
 use App\Contracts\Repositories\AppointmentRepositoryInterface;
 use App\Contracts\Services\AppointmentServiceInterface;
 use App\Repositories\AppointmentRepository;
@@ -40,6 +42,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(EstimateServiceInterface::class, EstimateService::class);
         $this->app->bind(\App\Contracts\Repositories\ServiceRepositoryInterface::class, \App\Repositories\ServiceRepository::class);
         $this->app->bind(\App\Contracts\Services\ServiceServiceInterface::class, \App\Services\ServiceService::class);
+
+        // Orchestrator service bindings
+        $this->app->bind(CustomerListingOrchestratorService::class, CustomerListingOrchestratorService::class);
+        $this->app->bind(CustomerCrudOrchestratorService::class, CustomerCrudOrchestratorService::class);
     }
 
     /**
