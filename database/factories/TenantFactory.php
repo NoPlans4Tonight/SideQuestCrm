@@ -25,8 +25,8 @@ class TenantFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->company(),
-            'domain' => $this->faker->domainName(),
+            'name' => $this->faker->unique()->company(),
+            'domain' => $this->faker->unique()->domainName(),
             'database' => 'tenant_' . $this->faker->unique()->numberBetween(1000, 9999),
             'company_name' => $this->faker->company(),
             'contact_email' => $this->faker->companyEmail(),
