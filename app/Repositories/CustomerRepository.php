@@ -6,6 +6,8 @@ use App\Contracts\Repositories\CustomerRepositoryInterface;
 use App\Models\Customer;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Validator;
 
 class CustomerRepository implements CustomerRepositoryInterface
 {
@@ -47,11 +49,21 @@ class CustomerRepository implements CustomerRepositoryInterface
 
     public function create(array $data): Customer
     {
+        // Validate email uniqueness at repository level
+        if (isset($data['email']) && $data['email']) {
+            $this->validateEmailUniqueness($data['email'], $data['tenant_id'] ?? null);
+        }
+
         return Customer::create($data);
     }
 
     public function update(Customer $customer, array $data): Customer
     {
+        // Validate email uniqueness at repository level
+        if (isset($data['email']) && $data['email']) {
+            $this->validateEmailUniqueness($data['email'], $customer->tenant_id, $customer->id);
+        }
+
         $customer->update($data);
         return $customer->fresh();
     }
@@ -92,5 +104,29 @@ class CustomerRepository implements CustomerRepositoryInterface
         return Customer::where('tenant_id', $tenantId)
             ->where('assigned_to', $userId)
             ->get();
+    }
+
+    /**
+     * Validate email uniqueness within tenant
+     */
+    private function validateEmailUniqueness(string $email, ?int $tenantId, ?int $excludeCustomerId = null): void
+    {
+        $query = Customer::where('email', $email);
+
+        if ($tenantId) {
+            $query->where('tenant_id', $tenantId);
+        }
+
+        if ($excludeCustomerId) {
+            $query->where('id', '!=', $excludeCustomerId);
+        }
+
+        if ($query->exists()) {
+            $validator = Validator::make(['email' => $email], [
+                'email' => 'unique:customers,email'
+            ]);
+
+            throw new ValidationException($validator);
+        }
     }
 }

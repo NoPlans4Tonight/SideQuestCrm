@@ -9,12 +9,12 @@ use App\Models\Service;
 use App\Models\Estimate;
 use App\Models\EstimateItem;
 use App\Models\Tenant;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class EstimateControllerTest extends TestCase
 {
-    use RefreshDatabase, WithFaker;
+    use WithFaker, RefreshDatabase;
 
     protected $customer;
     protected $service;
@@ -22,6 +22,10 @@ class EstimateControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        // Initialize tenant and user for tests
+        $this->tenant = Tenant::factory()->create();
+        $this->user = User::factory()->create(['tenant_id' => $this->tenant->id]);
 
         $this->customer = Customer::factory()->create([
             'tenant_id' => $this->tenant->id,

@@ -20,6 +20,10 @@ class CustomerRepositoryTest extends TestCase
     {
         parent::setUp();
         $this->repository = new CustomerRepository();
+
+        // Initialize tenant and user for tests
+        $this->tenant = Tenant::factory()->create();
+        $this->user = User::factory()->create(['tenant_id' => $this->tenant->id]);
     }
 
     public function test_find_by_id_returns_customer_when_exists(): void

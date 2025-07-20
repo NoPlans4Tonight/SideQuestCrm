@@ -21,14 +21,14 @@ class CustomerCrudOrchestratorService
     {
         try {
             $customer = $this->customerService->createCustomer(
-                $request->all(),
+                $request->validated(),
                 $tenantId,
                 $userId
             );
 
             return [
                 'message' => 'Customer created successfully',
-                'data' => $customer
+                'data' => new CustomerResource($customer)
             ];
         } catch (ValidationException $e) {
             throw $e;
@@ -38,12 +38,12 @@ class CustomerCrudOrchestratorService
     /**
      * Update an existing customer
      */
-    public function updateCustomer(int $customerId, Request $request): array
+    public function updateCustomer(int $customerId, Request $request, int $tenantId): array
     {
-        $customer = $this->findCustomerOrFail($customerId);
+        $customer = $this->findCustomerOrFail($customerId, $tenantId);
 
         try {
-            $updatedCustomer = $this->customerService->updateCustomer($customer->id, $request->all());
+            $updatedCustomer = $this->customerService->updateCustomer($customer->id, $request->validated());
 
             return [
                 'message' => 'Customer updated successfully',
@@ -57,9 +57,9 @@ class CustomerCrudOrchestratorService
     /**
      * Delete a customer
      */
-    public function deleteCustomer(int $customerId): array
+    public function deleteCustomer(int $customerId, int $tenantId): array
     {
-        $customer = $this->findCustomerOrFail($customerId);
+        $customer = $this->findCustomerOrFail($customerId, $tenantId);
 
         $this->customerService->deleteCustomer($customer->id);
 
@@ -71,9 +71,11 @@ class CustomerCrudOrchestratorService
     /**
      * Find customer or throw 404
      */
-    private function findCustomerOrFail(int $customerId): Customer
+    private function findCustomerOrFail(int $customerId, int $tenantId): Customer
     {
-        $customer = Customer::find($customerId);
+        $customer = Customer::where('id', $customerId)
+            ->where('tenant_id', $tenantId)
+            ->first();
 
         if (!$customer) {
             abort(404, 'Customer not found');

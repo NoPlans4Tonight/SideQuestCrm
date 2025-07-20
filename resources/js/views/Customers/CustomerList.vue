@@ -1,5 +1,14 @@
 <template>
   <div class="min-h-screen bg-gray-100">
+    <!-- Notification Component -->
+    <Notification
+      v-if="notification.show"
+      :type="notification.type"
+      :message="notification.message"
+      :duration="5000"
+      @close="closeNotification"
+    />
+
     <div class="py-6">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header -->
@@ -149,11 +158,33 @@
                         </div>
                       </div>
                     </div>
-                    <div class="flex items-center text-sm text-gray-500">
-                      <svg class="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                      {{ formatDate(customer.created_at) }}
+                    <div class="flex items-center space-x-2">
+                      <div class="text-sm text-gray-500">
+                        <svg class="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        {{ formatDate(customer.created_at) }}
+                      </div>
+                      <div class="flex items-center space-x-1">
+                        <router-link
+                          :to="`/customers/${customer.id}/edit`"
+                          class="text-indigo-600 hover:text-indigo-900 p-1 rounded"
+                          title="Edit customer"
+                        >
+                          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                        </router-link>
+                        <button
+                          @click.stop="deleteCustomer(customer.id)"
+                          class="text-red-600 hover:text-red-900 p-1 rounded"
+                          title="Delete customer"
+                        >
+                          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -239,13 +270,24 @@
 
 <script setup>
 import { ref, onMounted, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { useCustomerStore } from '@/stores/customerStore';
+import Notification from '@/components/Notification.vue';
 
 // Single responsibility: manage customer list display and interactions
+const route = useRoute();
+const router = useRouter();
 const customerStore = useCustomerStore();
 const searchQuery = ref('');
 const statusFilter = ref('');
 const assignedFilter = ref('');
+
+// Notification state
+const notification = ref({
+  show: false,
+  type: 'info',
+  message: ''
+});
 
 // Debounced search
 let searchTimeout = null;
@@ -269,6 +311,25 @@ const handleFilter = () => {
 const changePage = (page) => {
   if (page >= 1 && page <= customerStore.getPagination.last_page) {
     customerStore.fetchCustomers(page);
+  }
+};
+
+const deleteCustomer = async (customerId) => {
+  if (confirm('Are you sure you want to delete this customer? This action cannot be undone.')) {
+    try {
+      await customerStore.deleteCustomer(customerId);
+      notification.value = {
+        show: true,
+        type: 'success',
+        message: 'Customer deleted successfully'
+      };
+    } catch (error) {
+      notification.value = {
+        show: true,
+        type: 'error',
+        message: error.response?.data?.message || 'Failed to delete customer'
+      };
+    }
   }
 };
 
@@ -296,9 +357,32 @@ const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString();
 };
 
+const closeNotification = () => {
+  notification.value.show = false;
+  // Clear URL query parameters
+  router.replace({ query: {} });
+};
+
+const checkForNotifications = () => {
+  const { message, type } = route.query;
+  if (message) {
+    notification.value = {
+      show: true,
+      type: type || 'info',
+      message: message
+    };
+  }
+};
+
 onMounted(() => {
   customerStore.fetchCustomers();
+  checkForNotifications();
 });
+
+// Watch for route changes to refresh data and check for notifications
+watch(() => route.query, () => {
+  checkForNotifications();
+}, { deep: true });
 
 // Watch for route changes to refresh data
 watch(() => customerStore.getCustomers, () => {

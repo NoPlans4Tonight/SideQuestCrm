@@ -17,8 +17,8 @@ class UpdateCustomerRequest extends FormRequest
         $customerId = $this->route('customer');
 
         return [
-            'first_name' => 'sometimes|required|string|max:255',
-            'last_name' => 'sometimes|required|string|max:255',
+            'first_name' => 'sometimes|nullable|string|max:255',
+            'last_name' => 'sometimes|nullable|string|max:255',
             'email' => [
                 'sometimes',
                 'nullable',
@@ -42,8 +42,8 @@ class UpdateCustomerRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'first_name.required' => 'First name is required.',
-            'last_name.required' => 'Last name is required.',
+            'first_name.max' => 'First name cannot exceed 255 characters.',
+            'last_name.max' => 'Last name cannot exceed 255 characters.',
             'email.email' => 'Please provide a valid email address.',
             'email.unique' => 'This email address is already in use.',
             'phone.max' => 'Phone number cannot exceed 20 characters.',
