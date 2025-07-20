@@ -36,8 +36,6 @@ export const useAppointmentStore = defineStore('appointment', () => {
         ...params
       })
 
-      console.log('API URL:', `/api/appointments?${queryParams}`)
-
       const response = await fetch(`/api/appointments?${queryParams}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -48,7 +46,6 @@ export const useAppointmentStore = defineStore('appointment', () => {
 
       if (response.ok) {
         const data = await response.json()
-        console.log('API Response:', data)
         appointments.value = data.data
         pagination.value = data.meta
 
