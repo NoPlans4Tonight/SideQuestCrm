@@ -3,23 +3,19 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Customer;
-use App\Services\CustomerService;
-use App\Services\CustomerListingService;
+use App\Services\CustomerListingOrchestratorService;
+use App\Services\CustomerCrudOrchestratorService;
 use App\Services\CustomerDetailService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
-use App\Http\Resources\CustomerResource;
 
 class CustomerController extends Controller
 {
     public function __construct(
-        private CustomerService $customerService,
-        private CustomerListingService $listingService,
+        private CustomerListingOrchestratorService $listingOrchestrator,
+        private CustomerCrudOrchestratorService $crudOrchestrator,
         private CustomerDetailService $detailService
-    )
-    {
-    }
+    ) {}
 
     /**
      * Display a listing of the resource.
@@ -27,19 +23,7 @@ class CustomerController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
-
-        // Add caching for frequently accessed data
-        $cacheKey = "customers_{$user->tenant_id}_" . md5($request->fullUrl());
-        $cacheDuration = 300; // 5 minutes
-
-        // Don't cache if there are filters or specific parameters
-        if ($request->has('filter') || $request->has('search') || $request->get('per_page', 15) != 15) {
-            $result = $this->listingService->getCustomers($request, $user->tenant_id);
-        } else {
-            $result = cache()->remember($cacheKey, $cacheDuration, function () use ($request, $user) {
-                return $this->listingService->getCustomers($request, $user->tenant_id);
-            });
-        }
+        $result = $this->listingOrchestrator->getCustomersForRequest($request, $user->tenant_id);
 
         return response()->json($result);
     }
@@ -51,16 +35,9 @@ class CustomerController extends Controller
     {
         try {
             $user = auth()->user();
-            $customer = $this->customerService->createCustomer(
-                $request->all(),
-                $user->tenant_id,
-                $user->id
-            );
+            $result = $this->crudOrchestrator->createCustomer($request, $user->tenant_id, $user->id);
 
-            return response()->json([
-                'message' => 'Customer created successfully',
-                'data' => $customer
-            ], 201);
+            return response()->json($result, 201);
         } catch (ValidationException $e) {
             return response()->json([
                 'message' => 'Validation failed',
@@ -89,16 +66,10 @@ class CustomerController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $customer = Customer::find($id);
-        if (!$customer) {
-            return response()->json(['message' => 'Customer not found'], 404);
-        }
         try {
-            $updatedCustomer = $this->customerService->updateCustomer($customer->id, $request->all());
-            return response()->json([
-                'message' => 'Customer updated successfully',
-                'data' => new CustomerResource($updatedCustomer)
-            ]);
+            $result = $this->crudOrchestrator->updateCustomer($id, $request);
+
+            return response()->json($result);
         } catch (ValidationException $e) {
             return response()->json([
                 'message' => 'Validation failed',
@@ -112,14 +83,9 @@ class CustomerController extends Controller
      */
     public function destroy($id)
     {
-        $customer = Customer::find($id);
-        if (!$customer) {
-            return response()->json(['message' => 'Customer not found'], 404);
-        }
-        $this->customerService->deleteCustomer($customer->id);
-        return response()->json([
-            'message' => 'Customer deleted successfully'
-        ]);
+        $result = $this->crudOrchestrator->deleteCustomer($id);
+
+        return response()->json($result);
     }
 
     /**
@@ -136,6 +102,4 @@ class CustomerController extends Controller
 
         return response()->json($result);
     }
-
-
 }

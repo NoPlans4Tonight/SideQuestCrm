@@ -31,7 +31,7 @@
             >
               <option value="">Select a customer</option>
               <option v-for="customer in customers" :key="customer.id" :value="customer.id">
-                {{ customer.full_name || (customer.first_name + ' ' + customer.last_name) }}
+                {{ customer.full_name || 'Unnamed Customer' }}
               </option>
             </select>
           </div>
@@ -379,10 +379,12 @@ const calculatedTotal = computed(() => {
 // Methods
 const fetchCustomers = async () => {
   try {
-    const response = await axios.get('/api/customers')
-    customers.value = response.data.data
+    const response = await axios.get('/api/customers?simple=true')
+    console.log('Customers data:', response.data.data)
+    customers.value = response.data.data || []
   } catch (error) {
     console.error('Error fetching customers:', error)
+    customers.value = []
   }
 }
 
